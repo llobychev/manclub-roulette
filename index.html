@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru" style="background:#1a0b2e;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ManClub — Колесо удачи</title>
+<script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#1a0b2e;--bg2:#241340;--bg3:#2e1854;
+  --accent:#ff3ea5;--accent2:#ff7ac6;
+  --text:#f5eefc;--text2:#b9a8d6;--text3:#7a6a96;
+  --border:rgba(255,62,165,0.2);--gold:#ffd54a;
+}
+html,body{height:100%;background:var(--bg);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,sans-serif;overflow:hidden;}
+.app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;position:relative;background:radial-gradient(circle at 50% 0%,rgba(255,62,165,0.12),transparent 60%);}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.screen.active{display:flex;}
+.screen::-webkit-scrollbar{display:none;}
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999;}
+#splash .s-logo{font-size:14px;font-weight:700;letter-spacing:0.12em;color:var(--accent2);text-transform:uppercase;}
+#splash .s-spin{width:30px;height:30px;border:2px solid rgba(255,62,165,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.topbar{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-logo{font-size:14px;font-weight:700;letter-spacing:0.06em;color:var(--accent2);text-transform:uppercase;}
+.topbar-sub{font-size:10px;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase;margin-top:1px;}
+
+.content{flex:1;overflow-y:auto;padding:0 16px 24px;}
+
+/* WHEEL */
+.wheel-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 20px;}
+.wheel-stage{position:relative;width:280px;height:280px;margin-bottom:24px;}
+.wheel-pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:22px solid var(--gold);z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));}
+.wheel-svg{width:100%;height:100%;transition:transform 3.6s cubic-bezier(0.17,0.89,0.32,1.27);filter:drop-shadow(0 8px 24px rgba(255,62,165,0.35));}
+.wheel-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:var(--bg2);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:22px;z-index:5;}
+.spin-btn{padding:15px 44px;border:none;border-radius:30px;background:linear-gradient(135deg,var(--accent),#a020f0);color:#fff;font-size:15px;font-weight:700;letter-spacing:0.02em;cursor:pointer;box-shadow:0 6px 20px rgba(255,62,165,0.4);-webkit-appearance:none;}
+.spin-btn:disabled{background:var(--bg3);color:var(--text3);box-shadow:none;cursor:default;}
+.spin-status{margin-top:14px;font-size:12px;color:var(--text2);text-align:center;line-height:1.6;}
+.spin-status .countdown{color:var(--accent2);font-weight:700;}
+
+/* RESULT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,3,20,0.85);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.modal-overlay.active{display:flex;}
+.result-box{width:100%;max-width:340px;background:linear-gradient(160deg,var(--bg2),var(--bg3));border-radius:24px;padding:32px 26px;text-align:center;border:1px solid var(--border);box-shadow:0 20px 60px rgba(255,62,165,0.25);}
+.result-icon{font-size:54px;margin-bottom:16px;}
+.result-title{font-size:19px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.result-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px;}
+.result-close{width:100%;padding:14px;border:none;border-radius:14px;background-color:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;}
+
+/* NAV */
+.bottomnav{height:64px;background:var(--bg2);border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 2px env(safe-area-inset-bottom,6px);flex-shrink:0;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 10px;border-radius:10px;min-width:60px;}
+.nav-item.active .nav-icon,.nav-item.active .nav-label{color:var(--accent2);}
+.nav-icon{font-size:20px;color:var(--text3);line-height:1;}
+.nav-label{font-size:9px;color:var(--text3);text-transform:uppercase;}
+
+.generic-stub{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;}
+.generic-stub-icon{font-size:48px;margin-bottom:16px;opacity:0.7;}
+.generic-stub-text{font-size:14px;color:var(--text3);line-height:1.6;}
+
+/* REGISTER */
+.reg-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 26px;text-align:center;}
+.reg-icon{font-size:52px;margin-bottom:20px;}
+.reg-title{font-size:21px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.3;}
+.reg-sub{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:26px;}
+.form-input{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:11px;padding:13px 14px;font-size:14px;color:var(--text);outline:none;-webkit-appearance:none;margin-bottom:10px;}
+.form-input::placeholder{color:var(--text3);}
+.btn-primary{width:100%;padding:14px;border:none;border-radius:14px;background-color:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none;}
+
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;color:var(--text);z-index:300;display:none;max-width:80%;text-align:center;}
+.toast.show{display:block;}
+</style>
+</head>
+<body>
+<div class="app" id="root">
+
+<div id="splash"><div class="s-logo">ManClub</div><div class="s-spin"></div></div>
+
+<!-- REGISTER -->
+<div class="screen" id="s-register">
+  <div class="reg-wrap">
+    <div class="reg-icon">🎰</div>
+    <div class="reg-title">Колесо удачи ManClub</div>
+    <div class="reg-sub">Крути колесо каждый день и получай призы. Укажи имя, чтобы начать.</div>
+    <input class="form-input" id="reg-name" placeholder="Имя">
+    <button class="btn-primary" onclick="submitRegistration()">Начать →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="main-app" style="display:none;">
+  <div class="app-screen active" id="s-roulette" style="flex:1;display:flex;flex-direction:column;overflow-y:auto;">
+    <div class="topbar"><div><div class="topbar-logo">🎰 Колесо удачи</div><div class="topbar-sub">Крути раз в день</div></div></div>
+    <div class="content">
+      <div class="wheel-wrap">
+        <div class="wheel-stage">
+          <div class="wheel-pointer"></div>
+          <svg class="wheel-svg" id="wheel-svg" viewBox="0 0 300 300"></svg>
+          <div class="wheel-hub">🎁</div>
+        </div>
+        <button class="spin-btn" id="spin-btn" onclick="spinWheel()">Крутить</button>
+        <div class="spin-status" id="spin-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-screen" id="s-checkup" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
+    <div class="topbar"><div><div class="topbar-logo">🧭 Чекап жизни</div><div class="topbar-sub">Оцени свои сферы</div></div></div>
+    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text">Чекап жизни скоро появится здесь.</div></div>
+  </div>
+
+  <div class="app-screen" id="s-demo" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
+    <div class="topbar"><div><div class="topbar-logo">🔑 Демо-доступ</div><div class="topbar-sub">Попробуй ManClub бесплатно</div></div></div>
+    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text">Демо-доступ к основному приложению скоро появится здесь.</div></div>
+  </div>
+
+  <div class="app-screen" id="s-gifts" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
+    <div class="topbar"><div><div class="topbar-logo">🎁 Материалы</div><div class="topbar-sub">Чек-листы и подарки</div></div></div>
+    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text">Чек-листы, призы и материалы скоро появятся здесь.</div></div>
+  </div>
+
+  <nav class="bottomnav">
+    <div class="nav-item active" id="nav-roulette" onclick="switchTab('roulette')"><div class="nav-icon">🎰</div><div class="nav-label">Рулетка</div></div>
+    <div class="nav-item" id="nav-checkup" onclick="switchTab('checkup')"><div class="nav-icon">🧭</div><div class="nav-label">Чекап</div></div>
+    <div class="nav-item" id="nav-demo" onclick="switchTab('demo')"><div class="nav-icon">🔑</div><div class="nav-label">Демо</div></div>
+    <div class="nav-item" id="nav-gifts" onclick="switchTab('gifts')"><div class="nav-icon">🎁</div><div class="nav-label">Подарки</div></div>
+  </nav>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-overlay" id="result-modal">
+  <div class="result-box">
+    <div class="result-icon" id="result-icon">🎉</div>
+    <div class="result-title" id="result-title">Поздравляем!</div>
+    <div class="result-desc" id="result-desc"></div>
+    <button class="result-close" onclick="closeResultModal()">Отлично!</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+var firebaseConfig={
+  apiKey:"AIzaSyD195j33cTr6labXodSH_jTeZsvs4L3U4w",
+  authDomain:"manproduction-club.firebaseapp.com",
+  projectId:"manproduction-club",
+  storageBucket:"manproduction-club.firebasestorage.app",
+  messagingSenderId:"962650441642",
+  appId:"1:962650441642:web:1be30d07d1ca62058c0dd3"
+};
+var fbDb=null;
+try{
+  if(window.firebase){
+    firebase.initializeApp(firebaseConfig);
+    fbDb=firebase.firestore();
+  }
+}catch(e){console.warn('Firebase init failed',e);}
+
+var myTgId=null;
+var myTgName='';
+var myUser=null;
+
+// 8 sectors — mixed prize pool as agreed
+var PRIZES=[
+  {id:'discount20',icon:'🎉',label:'-20%',title:'Скидка 20%!',desc:'Скидка 20% на подписку ManClub. Покажи этот экран при оплате.',color:'#ff3ea5'},
+  {id:'checklist',icon:'📄',label:'Чек-лист',title:'Чек-лист "Старт недели"',desc:'Бесплатный чек-лист уже доступен в разделе Подарки.',color:'#a020f0'},
+  {id:'empty1',icon:'😔',label:'Пусто',title:'Не повезло',desc:'В этот раз пусто — возвращайся завтра за новой попыткой!',color:'#5b3a8f'},
+  {id:'discount10',icon:'🎁',label:'-10%',title:'Скидка 10%!',desc:'Скидка 10% на подписку ManClub. Покажи этот экран при оплате.',color:'#ff7ac6'},
+  {id:'demo3',icon:'🔑',label:'+3 дня демо',title:'+3 дня демо-доступа',desc:'Дополнительные 3 дня демо-доступа к основному приложению ManClub.',color:'#c026d3'},
+  {id:'empty2',icon:'😔',label:'Пусто',title:'Не повезло',desc:'В этот раз пусто — возвращайся завтра за новой попыткой!',color:'#5b3a8f'},
+  {id:'discount50',icon:'💎',label:'-50%',title:'ДЖЕКПОТ! -50%',desc:'Невероятная скидка 50% на подписку ManClub! Покажи этот экран при оплате.',color:'#ffd54a'},
+  {id:'lesson',icon:'📚',label:'Урок',title:'Бесплатный урок',desc:'Один видеоурок из любой сферы ManClub бесплатно. Подробности в разделе Подарки.',color:'#9333ea'}
+];
+var SEGMENT_ANGLE=360/PRIZES.length;
+var isSpinning=false;
+var lastSpinResult=null;
+
+function getTg(){return window.Telegram&&window.Telegram.WebApp;}
+
+window.addEventListener('load',function(){
+  var tg=getTg();
+  if(tg){tg.ready();tg.expand();}
+  var u=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||null;
+  myTgId=u?String(u.id):('test_'+Math.floor(Math.random()*100000));
+  myTgName=u?((u.first_name||'')+' '+(u.last_name||'')).trim():'';
+
+  document.getElementById('splash').style.display='none';
+  drawWheel();
+
+  if(!fbDb){
+    showScreen('s-register');
+    return;
+  }
+
+  fbDb.collection('users').doc(myTgId).get().then(function(doc){
+    if(doc.exists){
+      myUser=doc.data();
+      launchApp();
+    } else {
+      showScreen('s-register');
+    }
+  }).catch(function(err){
+    console.warn('Failed to check user',err);
+    showScreen('s-register');
+  });
+});
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.style.display='none';s.classList.remove('active');});
+  var el=document.getElementById(id);
+  el.style.display='flex';el.classList.add('active');
+}
+
+function submitRegistration(){
+  var name=document.getElementById('reg-name').value.trim();
+  if(!name){showToast('Введи имя');return;}
+  if(!fbDb){showToast('Нет подключения к базе');return;}
+  var data={id:myTgId,name:name,tgUsername:'',createdAt:Date.now(),source:'sales_app'};
+  // Shared user identity: write to the same top-level "users" collection used by
+  // the main ManProduction app, keyed by Telegram user id, so either app
+  // recognizes a person who registered through the other one.
+  fbDb.collection('users').doc(myTgId).set(data,{merge:true}).then(function(){
+    myUser=data;
+    launchApp();
+  }).catch(function(err){
+    console.warn(err);
+    showToast('Ошибка регистрации, попробуй снова');
+  });
+}
+
+function launchApp(){
+  showScreen('main-app');
+  checkSpinAvailability();
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.app-screen').forEach(function(s){s.style.display='none';s.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var screen=document.getElementById('s-'+tab);
+  screen.style.display='flex';screen.classList.add('active');
+  document.getElementById('nav-'+tab).classList.add('active');
+}
+
+// WHEEL DRAWING
+function polarToCartesian(cx,cy,r,angleDeg){
+  var rad=(angleDeg-90)*Math.PI/180;
+  return {x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};
+}
+function drawWheel(){
+  var svg=document.getElementById('wheel-svg');
+  var cx=150,cy=150,r=145;
+  var html='';
+  PRIZES.forEach(function(p,i){
+    var startAngle=i*SEGMENT_ANGLE;
+    var endAngle=startAngle+SEGMENT_ANGLE;
+    var start=polarToCartesian(cx,cy,r,startAngle);
+    var end=polarToCartesian(cx,cy,r,endAngle);
+    var largeArc=SEGMENT_ANGLE>180?1:0;
+    html+='<path d="M'+cx+','+cy+' L'+start.x.toFixed(2)+','+start.y.toFixed(2)+' A'+r+','+r+' 0 '+largeArc+' 1 '+end.x.toFixed(2)+','+end.y.toFixed(2)+' Z" fill="'+p.color+'" stroke="#1a0b2e" stroke-width="2"/>';
+    var midAngle=startAngle+SEGMENT_ANGLE/2;
+    var labelPos=polarToCartesian(cx,cy,r*0.68,midAngle);
+    html+='<text x="'+labelPos.x.toFixed(2)+'" y="'+labelPos.y.toFixed(2)+'" fill="#fff" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" transform="rotate('+midAngle+','+labelPos.x.toFixed(2)+','+labelPos.y.toFixed(2)+')">'+p.label+'</text>';
+    var iconPos=polarToCartesian(cx,cy,r*0.88,midAngle);
+    html+='<text x="'+iconPos.x.toFixed(2)+'" y="'+iconPos.y.toFixed(2)+'" font-size="18" text-anchor="middle" dominant-baseline="middle">'+p.icon+'</text>';
+  });
+  svg.innerHTML=html;
+}
+
+function todayDateStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function checkSpinAvailability(){
+  if(!fbDb)return;
+  fbDb.collection('roulette_spins').doc(myTgId).get().then(function(doc){
+    var btn=document.getElementById('spin-btn');
+    var status=document.getElementById('spin-status');
+    if(doc.exists&&doc.data().lastSpinDate===todayDateStr()){
+      btn.disabled=true;
+      btn.textContent='Уже крутили сегодня';
+      status.innerHTML='Следующая попытка <span class="countdown">завтра</span>';
+    } else {
+      btn.disabled=false;
+      btn.textContent='Крутить';
+      status.textContent='Один бесплатный спин в день';
+    }
+  }).catch(function(err){console.warn(err);});
+}
+
+function spinWheel(){
+  if(isSpinning)return;
+  isSpinning=true;
+  var btn=document.getElementById('spin-btn');
+  btn.disabled=true;
+
+  var winnerIdx=Math.floor(Math.random()*PRIZES.length);
+  var prize=PRIZES[winnerIdx];
+  // Wheel must land so that the winning segment's center sits under the top pointer.
+  var segmentCenter=winnerIdx*SEGMENT_ANGLE+SEGMENT_ANGLE/2;
+  var fullSpins=4*360;
+  var targetRotation=fullSpins+(360-segmentCenter);
+  var svg=document.getElementById('wheel-svg');
+  svg.style.transform='rotate('+targetRotation+'deg)';
+
+  setTimeout(function(){
+    isSpinning=false;
+    lastSpinResult=prize;
+    showResultModal(prize);
+    recordSpin(prize);
+  },3700);
+}
+
+function recordSpin(prize){
+  if(!fbDb)return;
+  fbDb.collection('roulette_spins').doc(myTgId).set({
+    userId:myTgId,
+    lastSpinDate:todayDateStr(),
+    lastPrize:prize.id,
+    updatedAt:Date.now()
+  },{merge:true}).then(function(){
+    fbDb.collection('roulette_spins').doc(myTgId).collection('history').add({
+      prizeId:prize.id,prizeTitle:prize.title,date:todayDateStr(),createdAt:Date.now()
+    }).catch(function(){});
+  }).catch(function(err){console.warn('Failed to record spin',err);});
+}
+
+function showResultModal(prize){
+  document.getElementById('result-icon').textContent=prize.icon;
+  document.getElementById('result-title').textContent=prize.title;
+  document.getElementById('result-desc').textContent=prize.desc;
+  document.getElementById('result-modal').classList.add('active');
+}
+function closeResultModal(){
+  document.getElementById('result-modal').classList.remove('active');
+  checkSpinAvailability();
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){t.classList.remove('show');},2200);
+}
+
+document.addEventListener('focusin',function(e){
+  var tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'){
+    setTimeout(function(){e.target.scrollIntoView({block:'center',behavior:'smooth'});},300);
+  }
+});
+</script>
+</body>
+</html>
