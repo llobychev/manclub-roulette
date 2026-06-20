@@ -15,8 +15,8 @@
   --text:#f5eefc;--text2:#b9a8d6;--text3:#7a6a96;
   --border:rgba(255,62,165,0.2);--gold:#ffd54a;
 }
-html,body{height:100%;background:var(--bg);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,sans-serif;overflow:hidden;}
-.app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;position:relative;background:radial-gradient(circle at 50% 0%,rgba(255,62,165,0.12),transparent 60%);}
+html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,sans-serif;overflow:hidden;overflow-wrap:break-word;}
+.app{display:flex;flex-direction:column;height:100vh;width:100%;max-width:480px;margin:0 auto;position:relative;background:radial-gradient(circle at 50% 0%,rgba(255,62,165,0.12),transparent 60%);}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .screen.active{display:flex;}
 .screen::-webkit-scrollbar{display:none;}
@@ -155,12 +155,14 @@ var firebaseConfig={
   appId:"1:962650441642:web:1be30d07d1ca62058c0dd3"
 };
 var fbDb=null;
-try{
-  if(window.firebase){
-    firebase.initializeApp(firebaseConfig);
-    fbDb=firebase.firestore();
-  }
-}catch(e){console.warn('Firebase init failed',e);}
+function initFirebase(){
+  try{
+    if(window.firebase&&!fbDb){
+      firebase.initializeApp(firebaseConfig);
+      fbDb=firebase.firestore();
+    }
+  }catch(e){console.warn('Firebase init failed',e);}
+}
 
 var myTgId=null;
 var myTgName='';
@@ -184,6 +186,7 @@ var lastSpinResult=null;
 function getTg(){return window.Telegram&&window.Telegram.WebApp;}
 
 window.addEventListener('load',function(){
+  initFirebase();
   var tg=getTg();
   if(tg){tg.ready();tg.expand();}
   var u=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||null;
