@@ -113,12 +113,16 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
   <div class="app-screen" id="s-checkup" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
     <div class="topbar"><div><div class="topbar-logo">🧭 Чекап жизни</div><div class="topbar-sub">Оцени свои сферы</div></div></div>
-    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text">Чекап жизни скоро появится здесь.</div></div>
+    <div class="generic-stub">
+      <div class="generic-stub-icon">🚧</div>
+      <div class="generic-stub-text" id="checkup-status-text">Чекап жизни скоро появится здесь.</div>
+      <button class="btn-primary" id="checkup-cta" style="margin-top:18px;display:none;" onclick="startCheckup()">Пройти чекап</button>
+    </div>
   </div>
 
   <div class="app-screen" id="s-demo" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
     <div class="topbar"><div><div class="topbar-logo">🔑 Демо-доступ</div><div class="topbar-sub">Попробуй ManClub бесплатно</div></div></div>
-    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text">Демо-доступ к основному приложению скоро появится здесь.</div></div>
+    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text" id="demo-status-text">Демо-доступ к основному приложению скоро появится здесь.</div></div>
   </div>
 
   <div class="app-screen" id="s-gifts" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
@@ -171,20 +175,93 @@ var myTgId=null;
 var myTgName='';
 var myUser=null;
 
-// 8 sectors — mixed prize pool as agreed
-var PRIZES=[
-  {id:'discount20',icon:'🎉',label:'-20%',title:'Скидка 20%!',desc:'Скидка 20% на подписку ManClub. Покажи этот экран при оплате.',color:'#C9A84C'},
-  {id:'checklist',icon:'📄',label:'Чек-лист',title:'Чек-лист "Старт недели"',desc:'Бесплатный чек-лист уже доступен в разделе Подарки.',color:'#2E2E2E'},
-  {id:'empty1',icon:'😔',label:'Пусто',title:'Не повезло',desc:'В этот раз пусто — возвращайся завтра за новой попыткой!',color:'#C9A84C'},
-  {id:'discount10',icon:'🎁',label:'-10%',title:'Скидка 10%!',desc:'Скидка 10% на подписку ManClub. Покажи этот экран при оплате.',color:'#2E2E2E'},
-  {id:'demo3',icon:'🔑',label:'+3 дня демо',title:'+3 дня демо-доступа',desc:'Дополнительные 3 дня демо-доступа к основному приложению ManClub.',color:'#C9A84C'},
-  {id:'empty2',icon:'😔',label:'Пусто',title:'Не повезло',desc:'В этот раз пусто — возвращайся завтра за новой попыткой!',color:'#2E2E2E'},
-  {id:'discount50',icon:'💎',label:'-50%',title:'ДЖЕКПОТ! -50%',desc:'Невероятная скидка 50% на подписку ManClub! Покажи этот экран при оплате.',color:'#C9A84C'},
-  {id:'lesson',icon:'📚',label:'Урок',title:'Бесплатный урок',desc:'Один видеоурок из любой сферы ManClub бесплатно. Подробности в разделе Подарки.',color:'#2E2E2E'}
+// DECORATIVE WHEEL — 8 visual segments, unrelated to the real prize draw below.
+// With 19 weighted real prizes across 5 unlock stages, a literal 1:1 mapping of
+// wheel segment -> prize isn't practical without redrawing the wheel every spin.
+// The wheel landing is just visual flavor; the real prize always comes from
+// pickWeightedPrize() and is shown in the result modal after the animation ends.
+var WHEEL_VISUAL=[
+  {icon:'🎉',color:'#C9A84C'},{icon:'🎁',color:'#2E2E2E'},
+  {icon:'💎',color:'#C9A84C'},{icon:'🔑',color:'#2E2E2E'},
+  {icon:'📚',color:'#C9A84C'},{icon:'🎫',color:'#2E2E2E'},
+  {icon:'🔁',color:'#C9A84C'},{icon:'✨',color:'#2E2E2E'}
 ];
-var SEGMENT_ANGLE=360/PRIZES.length;
+var WHEEL_SEGMENT_ANGLE=360/WHEEL_VISUAL.length;
+
+// REAL PRIZE POOL — base weights assume totalSpins>=20 (everything unlocked).
+// minSpin: number of PAST completed spins required before this prize is eligible
+//   (e.g. minSpin:6 = unlocks starting on the 7th spin).
+// maxSpin: prize stops being eligible once totalSpins reaches this value
+//   (used only for the 4 lesson slots that convert into demo-access prizes).
+// Lesson titles below are placeholders (5 М Protocol spheres + 2 generic) —
+// real titles/topics can be swapped in later without touching the logic.
+var PRIZE_POOL=[
+  {id:'discount5',cat:'discount',icon:'🎉',title:'Скидка 5%',weight:10,minSpin:0,
+    desc:'Скидка 5% при оплате подписки ManClub на 6 месяцев. Не действует при продлении.'},
+  {id:'discount15',cat:'discount',icon:'🎊',title:'Скидка 15%',weight:5,minSpin:9,
+    desc:'Скидка 15% при оплате подписки ManClub ровно на 2 месяца. Не действует при продлении.'},
+  {id:'discount50',cat:'discount',icon:'💎',title:'Скидка 50%',weight:1,minSpin:20,
+    desc:'Скидка 50% при оплате подписки ManClub на 3 месяца и более. Не действует при продлении.'},
+  {id:'ticket',cat:'ticket',icon:'🎫',title:'Билет на чекап',weight:15,minSpin:0,
+    desc:'Теперь можно пройти тест и получить персональный чек-лист по своей слабой сфере.'},
+  {id:'sub1',cat:'sub',icon:'🎁',title:'Подписка на 1 месяц',weight:9,minSpin:0,months:1,
+    desc:'Бесплатная подписка на основной клуб ManClub на 1 месяц.'},
+  {id:'sub3',cat:'sub',icon:'🎁',title:'Подписка на 3 месяца',weight:3,minSpin:13,months:3,
+    desc:'Бесплатная подписка на основной клуб ManClub на 3 месяца.'},
+  {id:'sub6',cat:'sub',icon:'🎁',title:'Подписка на 6 месяцев',weight:1,minSpin:13,months:6,
+    desc:'Бесплатная подписка на основной клуб ManClub на 6 месяцев.'},
+  {id:'spin2',cat:'spin',icon:'🔁',title:'+2 попытки сегодня',weight:9,minSpin:0,extra:2,
+    desc:'Можно крутить колесо ещё 2 раза сегодня.'},
+  {id:'spin4',cat:'spin',icon:'🔁',title:'+4 попытки сегодня',weight:3,minSpin:0,extra:4,
+    desc:'Можно крутить колесо ещё 4 раза сегодня.'},
+  {id:'demo2w',cat:'demo',icon:'🔑',title:'Демо-доступ на 2 недели',weight:14,minSpin:6,days:14,
+    desc:'Демо-доступ к основному приложению ManClub на 2 недели.'},
+  {id:'demo1m',cat:'demo',icon:'🔑',title:'Демо-доступ на 1 месяц',weight:9,minSpin:6,days:30,
+    desc:'Демо-доступ к основному приложению ManClub на 1 месяц.'},
+  {id:'demo3m',cat:'demo',icon:'🔑',title:'Демо-доступ на 3 месяца',weight:3,minSpin:6,days:90,
+    desc:'Демо-доступ к основному приложению ManClub на 3 месяца.'},
+  {id:'lesson1',cat:'lesson',icon:'📚',title:'Бесплатный урок: Тело',weight:6,minSpin:0,
+    desc:'Урок открыт. Появится в разделе Подарки.'},
+  {id:'lesson2',cat:'lesson',icon:'📚',title:'Бесплатный урок: Деньги',weight:6,minSpin:0,
+    desc:'Урок открыт. Появится в разделе Подарки.'},
+  {id:'lesson3',cat:'lesson',icon:'📚',title:'Бесплатный урок: Люди',weight:6,minSpin:0,
+    desc:'Урок открыт. Появится в разделе Подарки.'},
+  {id:'lesson4',cat:'lesson',icon:'📚',title:'Бесплатный урок: Голова',weight:6,minSpin:0,maxSpin:6,
+    desc:'Урок открыт. Появится в разделе Подарки.'},
+  {id:'lesson5',cat:'lesson',icon:'📚',title:'Бесплатный урок: Жизнь',weight:6,minSpin:0,maxSpin:6,
+    desc:'Урок открыт. Появится в разделе Подарки.'},
+  {id:'lesson6',cat:'lesson',icon:'📚',title:'Бесплатный урок №6',weight:6,minSpin:0,maxSpin:6,
+    desc:'Урок открыт. Появится в разделе Подарки.'},
+  {id:'lesson7',cat:'lesson',icon:'📚',title:'Бесплатный урок №7',weight:6,minSpin:0,maxSpin:6,
+    desc:'Урок открыт. Появится в разделе Подарки.'}
+];
+
+function getEligiblePrizes(totalSpins){
+  return PRIZE_POOL.filter(function(p){
+    if(totalSpins<p.minSpin)return false;
+    if(p.maxSpin!==undefined&&totalSpins>=p.maxSpin)return false;
+    return true;
+  });
+}
+
+// Weight of every ineligible prize is implicitly redistributed, since we only
+// sum and draw from the currently-eligible subset — this is the agreed
+// "proportional redistribution" rule with zero extra bookkeeping.
+function pickWeightedPrize(totalSpins){
+  var pool=getEligiblePrizes(totalSpins);
+  var sum=0,i;
+  for(i=0;i<pool.length;i++)sum+=pool[i].weight;
+  var r=Math.random()*sum,acc=0;
+  for(i=0;i<pool.length;i++){
+    acc+=pool[i].weight;
+    if(r<acc)return pool[i];
+  }
+  return pool[pool.length-1];
+}
+
 var isSpinning=false;
 var lastSpinResult=null;
+var userState={totalSpins:0,extraSpinsToday:0,lastSpinDate:'',checkupTickets:0};
 
 function getTg(){return window.Telegram&&window.Telegram.WebApp;}
 
@@ -251,6 +328,41 @@ function switchTab(tab){
   var screen=document.getElementById('s-'+tab);
   screen.style.display='flex';screen.classList.add('active');
   document.getElementById('nav-'+tab).classList.add('active');
+  if(tab==='checkup')renderCheckupBadge();
+  if(tab==='demo')renderDemoStatus();
+}
+
+// Ticket counting/spending is wired end-to-end; the quiz itself isn't built
+// yet (separate stage) — start button just confirms the ticket would be spent.
+function renderCheckupBadge(){
+  var text=document.getElementById('checkup-status-text');
+  var cta=document.getElementById('checkup-cta');
+  if(!text||!cta)return;
+  if(userState.checkupTickets>0){
+    text.textContent='У тебя '+userState.checkupTickets+' неиспользованных билет(а/ов) на чекап.';
+    cta.style.display='block';
+  } else {
+    text.textContent='Выиграй билет на чекап в рулетке, чтобы пройти тест.';
+    cta.style.display='none';
+  }
+}
+function startCheckup(){
+  showToast('Тест появится в следующем обновлении — билет сохранён');
+}
+
+function renderDemoStatus(){
+  var text=document.getElementById('demo-status-text');
+  if(!text||!fbDb)return;
+  fbDb.collection('roulette_active_perks').doc(myTgId).get().then(function(doc){
+    var until=(doc.exists&&doc.data().demoAccessUntil)||0;
+    if(until>Date.now()){
+      var d=new Date(until);
+      var dateStr=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+      text.textContent='Демо-доступ активен до '+dateStr+'.';
+    } else {
+      text.textContent='Демо-доступ к основному приложению скоро появится здесь.';
+    }
+  }).catch(function(){});
 }
 
 // WHEEL DRAWING
@@ -262,18 +374,16 @@ function drawWheel(){
   var svg=document.getElementById('wheel-svg');
   var cx=150,cy=150,r=145;
   var html='';
-  PRIZES.forEach(function(p,i){
-    var startAngle=i*SEGMENT_ANGLE;
-    var endAngle=startAngle+SEGMENT_ANGLE;
+  WHEEL_VISUAL.forEach(function(seg,i){
+    var startAngle=i*WHEEL_SEGMENT_ANGLE;
+    var endAngle=startAngle+WHEEL_SEGMENT_ANGLE;
     var start=polarToCartesian(cx,cy,r,startAngle);
     var end=polarToCartesian(cx,cy,r,endAngle);
-    var largeArc=SEGMENT_ANGLE>180?1:0;
-    html+='<path d="M'+cx+','+cy+' L'+start.x.toFixed(2)+','+start.y.toFixed(2)+' A'+r+','+r+' 0 '+largeArc+' 1 '+end.x.toFixed(2)+','+end.y.toFixed(2)+' Z" fill="'+p.color+'" stroke="#0D0D0D" stroke-width="2"/>';
-    var midAngle=startAngle+SEGMENT_ANGLE/2;
-    var labelPos=polarToCartesian(cx,cy,r*0.68,midAngle);
-    html+='<text x="'+labelPos.x.toFixed(2)+'" y="'+labelPos.y.toFixed(2)+'" fill="#fff" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle" transform="rotate('+midAngle+','+labelPos.x.toFixed(2)+','+labelPos.y.toFixed(2)+')">'+p.label+'</text>';
-    var iconPos=polarToCartesian(cx,cy,r*0.88,midAngle);
-    html+='<text x="'+iconPos.x.toFixed(2)+'" y="'+iconPos.y.toFixed(2)+'" font-size="18" text-anchor="middle" dominant-baseline="middle">'+p.icon+'</text>';
+    var largeArc=WHEEL_SEGMENT_ANGLE>180?1:0;
+    html+='<path d="M'+cx+','+cy+' L'+start.x.toFixed(2)+','+start.y.toFixed(2)+' A'+r+','+r+' 0 '+largeArc+' 1 '+end.x.toFixed(2)+','+end.y.toFixed(2)+' Z" fill="'+seg.color+'" stroke="#0D0D0D" stroke-width="2"/>';
+    var midAngle=startAngle+WHEEL_SEGMENT_ANGLE/2;
+    var iconPos=polarToCartesian(cx,cy,r*0.78,midAngle);
+    html+='<text x="'+iconPos.x.toFixed(2)+'" y="'+iconPos.y.toFixed(2)+'" font-size="22" text-anchor="middle" dominant-baseline="middle">'+seg.icon+'</text>';
   });
   svg.innerHTML=html;
 }
@@ -283,64 +393,143 @@ function todayDateStr(){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 
+function loadUserState(cb){
+  if(!fbDb){cb&&cb();return;}
+  fbDb.collection('roulette_spins').doc(myTgId).get().then(function(doc){
+    if(doc.exists){
+      var d=doc.data();
+      userState.totalSpins=d.totalSpins||0;
+      userState.lastSpinDate=d.lastSpinDate||'';
+      // extra attempts never carry over to a new day
+      userState.extraSpinsToday=(d.lastSpinDate===todayDateStr())?(d.extraSpinsToday||0):0;
+      userState.checkupTickets=d.checkupTickets||0;
+    }
+    cb&&cb();
+  }).catch(function(err){console.warn(err);cb&&cb();});
+}
+
 function checkSpinAvailability(){
   if(!fbDb)return;
-  fbDb.collection('roulette_spins').doc(myTgId).get().then(function(doc){
+  loadUserState(function(){
     var btn=document.getElementById('spin-btn');
     var status=document.getElementById('spin-status');
-    if(doc.exists&&doc.data().lastSpinDate===todayDateStr()){
+    var spunToday=userState.lastSpinDate===todayDateStr();
+    if(spunToday&&userState.extraSpinsToday<=0){
       btn.disabled=true;
       btn.textContent='Уже крутили сегодня';
       status.innerHTML='Следующая попытка <span class="countdown">завтра</span>';
     } else {
       btn.disabled=false;
       btn.textContent='Крутить';
-      status.textContent='Один бесплатный спин в день';
+      status.textContent=(spunToday&&userState.extraSpinsToday>0)
+        ?('Осталось доп. попыток сегодня: '+userState.extraSpinsToday)
+        :'Один бесплатный спин в день';
     }
-  }).catch(function(err){console.warn(err);});
+    renderCheckupBadge();
+    renderDemoStatus();
+  });
 }
 
 function spinWheel(){
   if(isSpinning)return;
+  var spunToday=userState.lastSpinDate===todayDateStr();
+  if(spunToday&&userState.extraSpinsToday<=0){showToast('Сегодня попыток больше нет');return;}
   isSpinning=true;
-  var btn=document.getElementById('spin-btn');
-  btn.disabled=true;
+  document.getElementById('spin-btn').disabled=true;
 
-  var winnerIdx=Math.floor(Math.random()*PRIZES.length);
-  var prize=PRIZES[winnerIdx];
-  // Wheel must land so that the winning segment's center sits under the top pointer.
-  var segmentCenter=winnerIdx*SEGMENT_ANGLE+SEGMENT_ANGLE/2;
+  var prize=pickWeightedPrize(userState.totalSpins);
+
+  // Decorative landing only — random visual segment, unrelated to the real prize.
+  var visualIdx=Math.floor(Math.random()*WHEEL_VISUAL.length);
+  var segmentCenter=visualIdx*WHEEL_SEGMENT_ANGLE+WHEEL_SEGMENT_ANGLE/2;
   var fullSpins=4*360;
   var targetRotation=fullSpins+(360-segmentCenter);
-  var svg=document.getElementById('wheel-svg');
-  svg.style.transform='rotate('+targetRotation+'deg)';
+  document.getElementById('wheel-svg').style.transform='rotate('+targetRotation+'deg)';
 
   setTimeout(function(){
     isSpinning=false;
     lastSpinResult=prize;
-    showResultModal(prize);
-    recordSpin(prize);
+    applyPrizeAndRecord(prize,spunToday);
   },3700);
 }
 
-function recordSpin(prize){
-  if(!fbDb)return;
-  fbDb.collection('roulette_spins').doc(myTgId).set({
+function applyPrizeAndRecord(prize,wasSpunToday){
+  var newExtra=userState.extraSpinsToday;
+  if(wasSpunToday)newExtra=Math.max(0,newExtra-1); // this spin consumed an extra attempt
+  if(prize.cat==='spin')newExtra+=prize.extra;     // this spin's own prize grants more
+
+  var newTickets=userState.checkupTickets+(prize.cat==='ticket'?1:0);
+
+  var updates={
     userId:myTgId,
     lastSpinDate:todayDateStr(),
     lastPrize:prize.id,
-    updatedAt:Date.now()
-  },{merge:true}).then(function(){
+    updatedAt:Date.now(),
+    totalSpins:userState.totalSpins+1,
+    extraSpinsToday:newExtra,
+    checkupTickets:newTickets
+  };
+
+  fbDb.collection('roulette_spins').doc(myTgId).set(updates,{merge:true}).then(function(){
     fbDb.collection('roulette_spins').doc(myTgId).collection('history').add({
-      prizeId:prize.id,prizeTitle:prize.title,date:todayDateStr(),createdAt:Date.now()
+      prizeId:prize.id,prizeTitle:prize.title,prizeCategory:prize.cat,
+      date:todayDateStr(),createdAt:Date.now()
     }).catch(function(){});
-  }).catch(function(err){console.warn('Failed to record spin',err);});
+
+    if(prize.cat==='demo'||prize.cat==='sub'){
+      applyTimedPerk(prize);
+    }
+
+    userState.totalSpins=updates.totalSpins;
+    userState.lastSpinDate=updates.lastSpinDate;
+    userState.extraSpinsToday=updates.extraSpinsToday;
+    userState.checkupTickets=updates.checkupTickets;
+
+    showResultModal(prize);
+  }).catch(function(err){
+    console.warn('Failed to record spin',err);
+    showToast('Ошибка, попробуй снова');
+  });
+}
+
+// Shared perk doc (roulette_active_perks) is keyed by the same Telegram id used
+// by the main ManProduction app, so it can read demoAccessUntil /
+// freeSubscriptionUntil directly from the same Firebase project. A new grant
+// always extends from whichever is later — today, or an already-active perk —
+// so a smaller prize can never shorten time already won.
+function applyTimedPerk(prize){
+  var field=prize.cat==='demo'?'demoAccessUntil':'freeSubscriptionUntil';
+  var addMs=(prize.days?prize.days:prize.months*30)*24*60*60*1000;
+  var perkRef=fbDb.collection('roulette_active_perks').doc(myTgId);
+  perkRef.get().then(function(pdoc){
+    var current=(pdoc.exists&&pdoc.data()[field])||0;
+    var base=Math.max(current,Date.now());
+    var update={};
+    update[field]=base+addMs;
+    perkRef.set(update,{merge:true}).catch(function(){});
+  }).catch(function(){});
 }
 
 function showResultModal(prize){
   document.getElementById('result-icon').textContent=prize.icon;
-  document.getElementById('result-title').textContent=prize.title;
+  document.getElementById('result-title').textContent=prize.title+'!';
   document.getElementById('result-desc').textContent=prize.desc;
+
+  var btn=document.getElementById('result-close');
+  if(prize.cat==='ticket'){
+    btn.textContent='Пройти чекап →';
+    btn.onclick=function(){closeResultModal();switchTab('checkup');};
+  } else if(prize.cat==='spin'){
+    btn.textContent='Крутить ещё →';
+    btn.onclick=function(){closeResultModal();spinWheel();};
+  } else if(prize.cat==='demo'){
+    btn.textContent='Перейти к демо →';
+    btn.onclick=function(){closeResultModal();switchTab('demo');};
+  } else {
+    btn.textContent='Отлично';
+    btn.onclick=closeResultModal;
+  }
+
   document.getElementById('result-modal').classList.add('active');
 }
 function closeResultModal(){
