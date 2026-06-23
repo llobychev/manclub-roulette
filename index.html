@@ -74,6 +74,86 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:10px 18px;font-size:12px;color:var(--text);z-index:300;display:none;max-width:80%;text-align:center;}
 .toast.show{display:block;}
+
+/* === CHECKUP SYSTEM === */
+.ck-view{display:none;flex-direction:column;flex:1;overflow-y:auto;padding:0 16px 24px;}
+.ck-view.active{display:flex;}
+.ck-progress{width:100%;height:4px;background:var(--bg3);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.ck-progress-fill{height:100%;background:var(--accent);transition:width .3s;}
+.ck-step{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.ck-q{font-size:17px;font-weight:500;line-height:1.4;margin-bottom:20px;}
+.ck-scale{display:flex;gap:8px;margin-bottom:10px;}
+.ck-scale-btn{flex:1;padding:10px 6px;border:1px solid #333;background:var(--bg2);border-radius:8px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text);}
+.ck-scale-btn:hover,.ck-scale-btn.sel{border-color:var(--accent);}
+.ck-scale-btn.sel{background:var(--accent);color:var(--bg);}
+.ck-scale-btn .sv{font-size:18px;font-weight:600;display:block;}
+.ck-scale-btn .sd{font-size:9px;color:var(--text3);display:block;margin-top:2px;}
+.ck-scale-btn.sel .sd{color:var(--bg);}
+.ck-opt{display:block;width:100%;padding:12px 14px;border:1px solid #333;background:var(--bg2);border-radius:8px;cursor:pointer;text-align:left;font-size:13px;line-height:1.4;color:var(--text);transition:all .2s;margin-bottom:8px;}
+.ck-opt:hover,.ck-opt.sel{border-color:var(--accent);}
+.ck-opt.sel{box-shadow:0 0 0 1px var(--accent);}
+.ck-btn{width:100%;padding:12px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;margin-top:16px;transition:all .2s;}
+.ck-btn:hover{background:var(--accent);color:var(--bg);}
+.ck-btn:disabled{opacity:.4;pointer-events:none;}
+/* Timer */
+.ck-timer{width:100%;height:5px;background:var(--bg3);border-radius:3px;margin-bottom:16px;overflow:hidden;}
+.ck-timer-fill{height:100%;background:var(--accent);transition:width .1s linear;}
+.ck-timer-fill.danger{background:#d32f2f;}
+/* Choice cards */
+.ck-choice{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ck-ch{padding:14px 10px;border:1px solid #333;background:var(--bg2);border-radius:8px;cursor:pointer;text-align:center;transition:all .2s;}
+.ck-ch:hover,.ck-ch.sel{border-color:var(--accent);}
+.ck-ch-e{font-size:28px;margin-bottom:6px;}
+.ck-ch-t{font-size:11px;line-height:1.3;color:#ccc;}
+/* Tarot */
+.ck-tarot-wrap{position:relative;height:260px;overflow:hidden;margin-bottom:12px;}
+.ck-tarot-track{display:flex;align-items:center;height:100%;gap:14px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);padding:0 14px;}
+.ck-tc{width:150px;height:230px;flex-shrink:0;perspective:600px;cursor:pointer;opacity:.5;transition:opacity .3s,transform .3s;}
+.ck-tc.act{opacity:1;transform:scale(1.05);}
+.ck-tc-in{width:100%;height:100%;position:relative;transition:transform .6s;transform-style:preserve-3d;}
+.ck-tc.flipped .ck-tc-in{transform:rotateY(180deg);}
+.ck-tc-f,.ck-tc-b{position:absolute;width:100%;height:100%;backface-visibility:hidden;border:2px solid #fff;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px;box-shadow:0 4px 14px rgba(0,0,0,.4);}
+.ck-tc-b{transform:rotateY(180deg);justify-content:flex-start;overflow-y:auto;}
+.ck-tc-b p{font-size:10px;line-height:1.3;color:#fff;margin-bottom:6px;}
+.ck-dots{display:flex;justify-content:center;gap:5px;margin-bottom:10px;}
+.ck-dot{width:7px;height:7px;border-radius:50%;background:#333;transition:all .2s;cursor:pointer;}
+.ck-dot.act{background:var(--accent);width:18px;border-radius:3px;}
+.ck-tnav{display:flex;justify-content:center;gap:10px;margin-bottom:12px;}
+.ck-tnav button{width:34px;height:34px;border-radius:50%;border:1px solid #444;background:var(--bg2);color:var(--text);font-size:16px;cursor:pointer;}
+/* Compare */
+.ck-cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ck-cmp-c{border:2px solid #333;border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:var(--bg2);transition:all .2s;}
+.ck-cmp-c:hover,.ck-cmp-c.sel{border-color:var(--accent);}
+.ck-cmp-n{font-size:13px;font-weight:600;margin:6px 0 4px;}
+.ck-cmp-d{font-size:10px;color:var(--text3);line-height:1.3;}
+/* Loading */
+.ck-loading{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+.ck-spinner{width:44px;height:44px;border:3px solid #333;border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;}
+/* Results */
+.ck-res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.ck-res-c{border:1px solid #333;border-radius:8px;padding:12px;text-align:center;cursor:pointer;background:var(--bg2);transition:all .2s;}
+.ck-res-c:hover,.ck-res-c.sel{border-color:var(--accent);background:#222;}
+.ck-res-e{font-size:26px;margin-bottom:4px;}
+.ck-res-n{font-size:11px;font-weight:600;margin-bottom:2px;}
+.ck-res-s{font-size:13px;font-weight:600;}
+.s-lo{color:#d32f2f;}.s-mi{color:#f57f17;}.s-hi{color:#2e7d32;}
+/* Checklist */
+.cl-sec{margin-bottom:20px;}
+.cl-sec h3{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:10px;}
+.cl-it{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;}
+.cl-chk{width:20px;height:20px;border:2px solid #555;border-radius:4px;flex-shrink:0;cursor:pointer;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.cl-chk.done{background:var(--accent);border-color:var(--accent);}
+.cl-chk.done::after{content:'✓';color:var(--bg);font-size:11px;font-weight:700;}
+.cl-it-t{font-size:12px;font-weight:600;margin-bottom:3px;}
+.cl-it-d{font-size:11px;color:var(--text3);line-height:1.4;}
+.cl-prog{margin-bottom:16px;}
+.cl-prog-t{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.cl-prog-bar{width:100%;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.cl-prog-fill{height:100%;background:var(--accent);transition:width .3s;}
+.cl-sales{background:linear-gradient(135deg,var(--bg2),#222);border:1px solid var(--accent);border-radius:10px;padding:18px;text-align:center;margin:20px 0;}
+.cl-sales h3{font-size:15px;font-weight:500;margin-bottom:6px;}
+.cl-sales p{font-size:12px;color:var(--text3);line-height:1.4;margin-bottom:14px;}
+.cl-dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
 </style>
 </head>
 <body>
@@ -113,10 +193,59 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
   <div class="app-screen" id="s-checkup" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
     <div class="topbar"><div><div class="topbar-logo">🧭 Чекап жизни</div><div class="topbar-sub">Оцени свои сферы</div></div></div>
-    <div class="generic-stub">
-      <div class="generic-stub-icon">🚧</div>
-      <div class="generic-stub-text" id="checkup-status-text">Чекап жизни скоро появится здесь.</div>
-      <button class="btn-primary" id="checkup-cta" style="margin-top:18px;display:none;" onclick="startCheckup()">Пройти чекап</button>
+
+    <!-- INTRO (no tickets or has tickets) -->
+    <div class="ck-view active" id="ck-intro" style="align-items:center;justify-content:center;text-align:center;padding:40px 24px;">
+      <div style="font-size:56px;margin-bottom:20px;">🔮</div>
+      <div style="font-size:18px;font-weight:500;margin-bottom:8px;" id="ck-intro-title">Чекап жизни</div>
+      <div style="font-size:13px;color:var(--text3);line-height:1.5;margin-bottom:24px;" id="ck-intro-desc">Выиграй билет на чекап в рулетке, чтобы пройти тест.</div>
+      <button class="ck-btn" id="ck-start-btn" style="display:none;" onclick="ckStart()">Пройти чекап</button>
+    </div>
+
+    <!-- GAMEPLAY -->
+    <div class="ck-view" id="ck-play">
+      <div class="ck-progress"><div class="ck-progress-fill" id="ckProg"></div></div>
+      <p class="ck-step" id="ckStep"></p>
+      <div id="ckContent"></div>
+      <button class="ck-btn" id="ckNext" onclick="ckNextStep()" disabled>Далее</button>
+    </div>
+
+    <!-- TAROT -->
+    <div class="ck-view" id="ck-tarot" style="padding-top:20px;">
+      <p class="ck-step" style="text-align:center;margin-bottom:12px;">Выбери карту, которая зовёт</p>
+      <div class="ck-tarot-wrap" id="ckTarotWrap"><div class="ck-tarot-track" id="ckTarotTrack"></div></div>
+      <div class="ck-dots" id="ckTarotDots"></div>
+      <div class="ck-tnav"><button onclick="ckTarotPrev()">‹</button><button onclick="ckTarotNext()">›</button></div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="ck-view" id="ck-loading" style="align-items:center;justify-content:center;text-align:center;">
+      <div class="ck-spinner"></div>
+      <p style="font-size:15px;font-weight:500;">Анализируем ваши ответы...</p>
+      <p style="font-size:12px;color:var(--text3);margin-top:6px;">Определяем слабейшую сферу</p>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="ck-view" id="ck-results" style="padding-top:20px;">
+      <h2 style="font-size:18px;font-weight:500;text-align:center;margin-bottom:6px;">Ваши результаты</h2>
+      <p style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:16px;">Выберите сферу для прокачки</p>
+      <div class="ck-res-grid" id="ckResGrid"></div>
+      <button class="ck-btn" id="ckResBtn" onclick="ckSelectSphere()" disabled>Получить чек-лист</button>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="ck-view" id="ck-checklist" style="padding-top:10px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span id="clE" style="font-size:26px;"></span>
+        <div><div id="clT" style="font-size:16px;font-weight:500;"></div><div id="clSub" style="font-size:11px;color:var(--text3);"></div></div>
+      </div>
+      <div class="cl-prog"><p class="cl-prog-t" id="clProgT">0 из 0</p><div class="cl-prog-bar"><div class="cl-prog-fill" id="clProgF"></div></div></div>
+      <div id="clIntro" style="font-size:12px;color:#ccc;line-height:1.4;margin-bottom:16px;background:var(--bg2);padding:14px;border-radius:8px;"></div>
+      <div id="clBody"></div>
+      <div class="cl-sales" id="clSales50" style="display:none;"><h3>Ты уже на полпути 💪</h3><p>В клубе есть полная программа по этой сфере с поддержкой, уроками и трекером прогресса.</p><button class="ck-btn" onclick="ckOpenSub()">Узнать больше</button></div>
+      <div class="cl-sales" id="clSales100" style="display:none;"><h3>Чек-лист пройден! 🎉</h3><p>Хочешь глубже? В клубе: персональная программа, видео-уроки, сообщество и трекер прогресса по всем 6 сферам.</p><button class="ck-btn" onclick="ckOpenSub()">Оформить подписку</button></div>
+      <div class="cl-dl"><button class="ck-btn" onclick="ckDlPdf()">↓ PDF</button><button class="ck-btn" onclick="ckDlImg()">↓ Картинка</button></div>
+      <button class="ck-btn" style="margin-top:10px;" onclick="ckBackToIntro()">← Назад</button>
     </div>
   </div>
 
@@ -144,7 +273,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
     <div class="result-icon" id="result-icon">🎉</div>
     <div class="result-title" id="result-title">Поздравляем!</div>
     <div class="result-desc" id="result-desc"></div>
-    <button class="result-close" onclick="closeResultModal()">Отлично!</button>
+    <button class="result-close" id="result-close" onclick="closeResultModal()">Отлично!</button>
   </div>
 </div>
 
@@ -332,23 +461,354 @@ function switchTab(tab){
   if(tab==='demo')renderDemoStatus();
 }
 
-// Ticket counting/spending is wired end-to-end; the quiz itself isn't built
-// yet (separate stage) — start button just confirms the ticket would be spent.
+// === CHECKUP SYSTEM ===
+var CK_SPHERES=[
+  {id:'body',name:'Тело и здоровье',emoji:'💪',color:'#d32f2f'},
+  {id:'money',name:'Деньги и работа',emoji:'💰',color:'#2e7d32'},
+  {id:'relations',name:'Отношения и семья',emoji:'💔',color:'#c2185b'},
+  {id:'env',name:'Окружение',emoji:'🚶',color:'#6a1b9a'},
+  {id:'rest',name:'Отдых и интересы',emoji:'🔥',color:'#0277bd'},
+  {id:'meaning',name:'Развитие и смысл',emoji:'🧭',color:'#f57f17'}
+];
+var CK1=[
+  {t:'Я не помню, когда последний раз делал что-то просто для кайфа.',s:4},
+  {t:'Рядом с близкими я часто чувствую напряжение или холодок.',s:2},
+  {t:'Я часто чувствую усталость, даже если вроде нормально спал.',s:0},
+  {t:'Я не понимаю, куда я иду и зачем делаю то, что делаю.',s:5},
+  {t:'Мне сложно выстраивать границы и говорить "нет".',s:3},
+  {t:'Я зарабатываю меньше, чем хочу, и не знаю, как это менять.',s:1},
+  {t:'Я живу как-то на автопилоте, без ясного направления.',s:5},
+  {t:'Мой режим (сон, питание, движение) — это неконтролируемый хаос.',s:0},
+  {t:'Есть люди в моей жизни, после которых я чувствую пустоту.',s:3},
+  {t:'Я не понимаю, куда уходят мои деньги, и это давит.',s:1},
+  {t:'Я держу важное в себе, потому что боюсь конфликта.',s:2},
+  {t:'Моя жизнь — только работа и обязанности, интересов почти нет.',s:4}
+];
+var CK2=[
+  {l:{e:'⚡',t:'Я полон энергии и хорошо сплю'},r:{e:'😴',t:'Я постоянно уставший'},s:0},
+  {l:{e:'💰',t:'Я контролирую свои деньги'},r:{e:'💸',t:'Деньги уходят, не знаю куда'},s:1},
+  {l:{e:'😌',t:'Я спокоен, тревожность под контролем'},r:{e:'😰',t:'Тревога постоянно'},s:3},
+  {l:{e:'👥',t:'Мне комфортно с людьми рядом'},r:{e:'🚶',t:'Я часто чувствую одиночество'},s:2},
+  {l:{e:'🔥',t:'Я регулярно делаю то, что дарит кайф'},r:{e:'😑',t:'Я забыл, что такое удовольствие'},s:4},
+  {l:{e:'✋',t:'Я легко говорю "нет"'},r:{e:'🙏',t:'Я с трудом говорю "нет"'},s:3},
+  {l:{e:'📈',t:'Я зарабатываю столько, сколько хочу'},r:{e:'📉',t:'Я зарабатываю меньше'},s:1},
+  {l:{e:'💪',t:'Мое тело в норме'},r:{e:'😔',t:'Мое тело не нравится мне'},s:0},
+  {l:{e:'🎯',t:'Я сконцентрирован, фокус есть'},r:{e:'🌀',t:'Голова в беспорядке'},s:3},
+  {l:{e:'🧭',t:'Я понимаю, куда я иду'},r:{e:'❓',t:'Я не вижу смысла'},s:5}
+];
+var CK3=[
+  {s:0,d:'Утром встаю уставшим. Тело просит помощи, но я всё откладываю. Энергия на нуле.'},
+  {s:1,d:'Деньги уходят неизвестно куда. Нет контроля, нет движения вперед.'},
+  {s:2,d:'Рядом с близкими держу дистанцию. Важное остаётся невысказанным.'},
+  {s:3,d:'Вокруг люди, но они забирают энергию. Не знаю, как сказать "нет".'},
+  {s:4,d:'Жизнь — одна большая обязанность. Забыл, что такое кайф и удовольствие.'},
+  {s:5,d:'Я не понимаю, куда я иду. Делаю то, что нужно, но смысла не вижу.'}
+];
+var CK4=[
+  {s:0,t:'Ты просыпаешься в понедельник. Спал плохо, не хватает сил. Работа интенсивная.',a:[{t:'Разминка или йога перед началом',v:3},{t:'Кофе и энергетики — тянуть день',v:0},{t:'Взять выходной, восстановиться',v:2},{t:'Игнорировать, как обычно',v:1}]},
+  {s:1,t:'Возможность: оставить стабильную работу ради рискованного проекта. Семья давит. Подушка маленькая.',a:[{t:'Остаться — хоть что-то',v:1},{t:'Сделать рывок',v:3},{t:'Обсудить с семьей, компромисс',v:2},{t:'Параллельно, потом переходить',v:0}]},
+  {s:2,t:'Партнёр обижена. Ты видишь, но избегаешь разговора. Напряжение растёт.',a:[{t:'Сесть и сказать правду',v:3},{t:'Ждать, пока остынет',v:1},{t:'Отвлечь — пойти куда-то',v:1},{t:'Всё пройдёт само',v:0}]},
+  {s:3,t:'Друг/коллега постоянно просит помощь, сливает энергию. Ты истощён.',a:[{t:'Сказать "нет", объяснить границы',v:3},{t:'Помочь, потом дистанцироваться',v:2},{t:'Продолжить помогать',v:0},{t:'Взорваться, разорвать',v:1}]},
+  {s:4,t:'Выходные. Много дел. Но хочется спорт, музыку, друзей.',a:[{t:'Отложить всё, сделать кайф',v:3},{t:'Дела в субботу, воскресенье для себя',v:2},{t:'Дела важнее, отдых потом',v:0},{t:'Прокрастинировать',v:1}]},
+  {s:5,t:'Достиг того, к чему стремился 5 лет. Но пустота. Зачем это было?',a:[{t:'Остановиться, переосмыслить',v:3},{t:'Новая амбициозная цель',v:2},{t:'По инерции, может смысл появится',v:0},{t:'Пауза, путешествовать',v:1}]}
+];
+var CK5=[
+  {s:0,g:{n:'Энергичный',d:'Спит 8 часов, спорт, хорошее питание.'},b:{n:'Истощённый',d:'Уставший, плохо спит, на кофе.'}},
+  {s:1,g:{n:'Стратег',d:'Контролирует финансы, растёт в доходе.'},b:{n:'На мели',d:'Деньги уходят, от зарплаты до зарплаты.'}},
+  {s:2,g:{n:'Открытый',d:'Говорит о чувствах, слушает. Доверие.'},b:{n:'Закрытый',d:'Молчит, избегает. Напряжение.'}},
+  {s:3,g:{n:'С границами',d:'Говорит "нет", выбирает окружение.'},b:{n:'Без границ',d:'Всем помогает, всё терпит.'}},
+  {s:4,g:{n:'Живой',d:'Хобби, интересы, кайф от жизни.'},b:{n:'Робот',d:'Только работа и обязанности.'}},
+  {s:5,g:{n:'С направлением',d:'Понимает куда идёт и зачем.'},b:{n:'На автопилоте',d:'По инерции, дни одинаковые.'}}
+];
+
+// CHECKLISTS (abbreviated keys for compactness)
+var CL_MAP={0:['body_a','body_b'],1:['money_a','money_b'],2:['rel_a','rel_b'],3:['env_a','env_b'],4:['rest_a','rest_b'],5:['mean_a','mean_b']};
+var CL_DATA={
+body_a:{t:'Перезагрузка тела за 14 дней',e:'💪',sub:'Сон, движение, питание',intro:'Тело — это фундамент. Этот чек-лист про минимальную базу, которую можно собрать за 14 дней. Без героизма.',sec:[
+{h:'Сон',items:[{t:'Ложиться до 23:00',d:'Сон до полуночи восстанавливает в 2 раза эффективнее.'},{t:'Убрать телефон за час до сна',d:'Экран убивает мелатонин. Положи заряжаться в другую комнату.'},{t:'Спать не менее 7 часов',d:'Не 5, не 6. Семь минимум.'},{t:'Проветривать комнату перед сном',d:'Мозг лучше засыпает в 18-20 градусах.'}]},
+{h:'Движение',items:[{t:'20 минут прогулки каждый день',d:'Не бег. Просто выйти и пройтись.'},{t:'10 минут утренней зарядки',d:'Потянулся, поприседал, размял шею.'},{t:'1 тренировка в неделю',d:'Зал, бассейн, бег — неважно что.'},{t:'Растяжка после сидячей работы',d:'Каждые 2 часа — встать, потянуться.'}]},
+{h:'Питание',items:[{t:'Завтракать каждый день',d:'Не кофе. Еда с белком.'},{t:'Пить 2 литра воды в день',d:'Не чай, не кофе. Вода.'},{t:'Убрать энергетики на 2 недели',d:'Замени на зелёный чай.'}]}
+]},
+body_b:{t:'Энергия и внешний вид',e:'💪',sub:'Состояние, уход, уверенность',intro:'Энергия и внешний вид — это не про тщеславие. Это про уверенность.',sec:[
+{h:'Энергия',items:[{t:'Замерять энергию утром (1-10)',d:'Через неделю увидишь паттерн.'},{t:'Найти 1 вещь, забирающую энергию',d:'Убрать на 14 дней.'},{t:'Добавить 1 привычку, дающую силы',d:'Каждый день, как чистку зубов.'},{t:'Не сидеть больше 2 часов подряд',d:'Каждые 2 часа — встать, пройтись.'}]},
+{h:'Внешний вид',items:[{t:'Записаться к барберу',d:'На этой неделе.'},{t:'Разобрать гардероб: выкинуть 5 вещей',d:'Те, что не носишь полгода.'},{t:'Купить 1 вещь для уверенности',d:'Ту, что хорошо сидит.'},{t:'Умывание утром и вечером',d:'Нормальным средством, не мылом.'}]},
+{h:'Состояние',items:[{t:'Контрастный душ — 7 дней',d:'Последние 30 секунд — холодная вода.'},{t:'Без алкоголя 14 дней',d:'Полностью. Увидишь разницу.'},{t:'3 вещи, за которые благодарен телу',d:'Переключает отношение к себе.'}]}
+]},
+money_a:{t:'Финансовая ясность за 14 дней',e:'💰',sub:'Учёт, порядок, мышление',intro:'Когда ты точно знаешь, сколько есть и куда уходит — пропадает финансовая тревога.',sec:[
+{h:'Учёт',items:[{t:'Записать ВСЕ расходы за 3 дня',d:'Открой историю карты. Запиши всё.'},{t:'Записывать каждый расход 14 дней',d:'Сумма + на что. Каждый раз.'},{t:'Посчитать реальный доход',d:'Точную цифру после налогов.'},{t:'Список подписок и автоплатежей',d:'Удивишь себя.'}]},
+{h:'Порядок',items:[{t:'Отменить 2 ненужные подписки',d:'Прямо сейчас.'},{t:'Расходы: нужно / хочу / мусор',d:'Цель — убрать "мусор".'},{t:'Лимит на ежедневные расходы',d:'Доход минус обязательные ÷ 30.'},{t:'Отложить сумму в день зарплаты',d:'ДО того, как начал тратить.'}]},
+{h:'Мышление',items:[{t:'Цель дохода через 6 месяцев',d:'Конкретная цифра.'},{t:'1 источник финансового образования',d:'Книга, подкаст, канал.'},{t:'Обсудить деньги с кем-то',d:'Честный разговор снимает давление.'}]}
+]},
+money_b:{t:'Движение вперёд в работе',e:'💰',sub:'Оценка, действия, стратегия',intro:'Честно посмотреть на положение, понять что держит, сделать первые шаги.',sec:[
+{h:'Честная оценка',items:[{t:'Я доволен тем, чем занимаюсь?',d:'Письменно. Честно.'},{t:'3 вещи, которые нравятся в работе',d:'Чтобы понять, что важно.'},{t:'3 вещи, которые бесят',d:'Менять или принять.'},{t:'Ты растёшь или стоишь?',d:'Сравни себя с годом назад.'}]},
+{h:'Действия',items:[{t:'Обновить резюме / портфолио',d:'Даже если не ищешь работу.'},{t:'Изучить рынок зарплат',d:'HH, LinkedIn. Знание = сила.'},{t:'Выбрать 1 навык для роста',d:'Один. 30 минут в день.'},{t:'Поговорить о росте с руководителем',d:'Какие перспективы на 6 месяцев?'}]},
+{h:'Долгосрочно',items:[{t:'Финансовая цель на 1 год',d:'Конкретная цифра.'},{t:'3 шага к этой цели',d:'Не бизнес-план. 3 действия.'},{t:'Отказаться от 1 импульсивной покупки',d:'Подожди 48 часов.'}]}
+]},
+rel_a:{t:'Честный разговор за 14 дней',e:'💔',sub:'Осознание, открытость, привычки',intro:'Отношения ломаются не от ссор, а от молчания.',sec:[
+{h:'Осознание',items:[{t:'Что я чувствую рядом с близким?',d:'Просто запиши.'},{t:'Последний конфликт: что НЕ сказал',d:'Увидеть паттерн молчания.'},{t:'3 вещи, которые ценишь в партнёре',d:'Зачем ты в этих отношениях.'},{t:'Ты слушаешь или ждёшь очередь?',d:'Попробуй просто слушать.'}]},
+{h:'Действия',items:[{t:'Сказать 1 честную вещь',d:'Не обвинение. Одна фраза.'},{t:'Спросить: как ты рядом со мной?',d:'Выслушать. Не спорить.'},{t:'30 минут без телефонов',d:'3 раза за 14 дней.'},{t:'Извиниться за 1 конкретную вещь',d:'Не "прости если что". Конкретно.'}]},
+{h:'Привычки',items:[{t:'Каждый вечер: как прошёл день?',d:'Выслушать полностью.'},{t:'1 жест заботы в день',d:'Чай, обнять, написать.'},{t:'Поймать момент закрытия — и остаться',d:'"Мне тяжело, но я хочу остаться".'}]}
+]},
+rel_b:{t:'Восстановление доверия',e:'💔',sub:'Слово, уязвимость, присутствие',intro:'Доверие строится каждый день маленькими действиями.',sec:[
+{h:'Слово = Дело',items:[{t:'Выполнить каждое обещание',d:'Даже мелкие. Слово = действие.'},{t:'Не обещать то, в чём не уверен',d:'Лучше "попробую".'},{t:'Какие обещания нарушил за месяц',d:'Для осознания паттерна.'},{t:'Признать 1 косяк без оправданий',d:'"Я облажался. Мне жаль." Точка.'}]},
+{h:'Уязвимость',items:[{t:'Рассказать о том, что беспокоит',d:'Про себя. Одно признание.'},{t:'Спросить: чем я могу помочь?',d:'Спросить и сделать.'},{t:'Выключить режим решателя',d:'"Тебе совет или послушать?"'},{t:'Отправить важное сообщение',d:'"Я ценю, что ты рядом."'}]},
+{h:'Присутствие',items:[{t:'1 совместное действие в неделю',d:'Запланированное. Конкретное.'},{t:'Убрать телефон при разговоре',d:'Полное внимание.'},{t:'Обнять без причины — каждый день',d:'5 секунд. Тело помнит тепло.'}]}
+]},
+env_a:{t:'Аудит окружения за 14 дней',e:'🚶',sub:'Осознание, границы, рост',intro:'Кто рядом помогает расти, а кто держит на месте.',sec:[
+{h:'Осознание',items:[{t:'Список 10 людей рядом',d:'Все, кто занимает время.'},{t:'Каждому поставить + или −',d:'Энергия или усталость после.'},{t:'Посчитать плюсы и минусы',d:'Если минусов больше — ответ.'},{t:'Определить 1 самого токсичного',d:'Один конкретный.'}]},
+{h:'Границы',items:[{t:'Сказать "нет" 1 раз за неделю',d:'Тренировка мышцы.'},{t:'Сократить время с "минусовым"',d:'Тихо, без конфликта.'},{t:'Не отвечать моментально',d:'Когда удобно тебе.'},{t:'Отписаться от 10 каналов',d:'Всё, что засоряет голову.'}]},
+{h:'Рост',items:[{t:'1 человек для обучения',d:'Подкастер, ментор, блогер.'},{t:'Написать тому, кто вдохновляет',d:'Большинство отвечают.'},{t:'Посетить 1 мероприятие',d:'Онлайн или офлайн.'}]}
+]},
+env_b:{t:'Построение своего круга',e:'🚶',sub:'Ценности, действия, поддержание',intro:'Не ждать правильных людей, а идти к ним.',sec:[
+{h:'Ценности',items:[{t:'3 качества важны в людях рядом',d:'Твой фильтр.'},{t:'Какой я сам в общении?',d:'Что ты даёшь? Окружение = обмен.'},{t:'Где обитают нужные люди?',d:'Найди где.'},{t:'Перестать жаловаться',d:'Замени на действие.'}]},
+{h:'Действия',items:[{t:'Написать 5 старым контактам',d:'"Привет, как дела?"'},{t:'Предложить кому-то встретиться',d:'Кофе, прогулка. На этой неделе.'},{t:'Присоединиться к 1 сообществу',d:'И быть активным.'},{t:'Помочь кому-то бескорыстно',d:'Строит репутацию.'}]},
+{h:'Поддержание',items:[{t:'1 контакт в неделю',d:'Поддержать связь.'},{t:'Делиться полезным контентом',d:'Статья, подкаст → перешли.'},{t:'Раз в месяц — переоценить',d:'Кто появился? Кто ушёл?'}]}
+]},
+rest_a:{t:'Вернуть кайф за 14 дней',e:'🔥',sub:'Вспомнить, сделать, закрепить',intro:'Вспомнить что нравится и вернуть в жизнь то, что даёт энергию.',sec:[
+{h:'Вспомнить',items:[{t:'5 вещей, которые приносили кайф',d:'Что любил 5-10 лет назад?'},{t:'Из 5 выбрать 1 и сделать',d:'На этой неделе. Вписать в календарь.'},{t:'Когда смеялся от души?',d:'Если не помнишь — серьёзный сигнал.'},{t:'Свободный день без обязательств?',d:'Если "не знаю" — это проблема.'}]},
+{h:'Действия',items:[{t:'1 час в день для себя',d:'Без чувства вины.'},{t:'Попробовать 1 новую активность',d:'Из любопытства.'},{t:'1 день без телефона',d:'Авиарежим. Посмотри что будет.'},{t:'Выйти на природу',d:'Без наушников. Без цели.'}]},
+{h:'Привычки',items:[{t:'Не чувствовать вину за отдых',d:'Отдых = часть продуктивности.'},{t:'Планировать отдых как работу',d:'В календарь.'},{t:'1 человек для веселья',d:'Не для серьёзных разговоров.'}]}
+]},
+rest_b:{t:'Баланс обязанностей и жизни',e:'🔥',sub:'Анализ, перестройка, привычки',intro:'Перестать откладывать себя на потом.',sec:[
+{h:'Анализ',items:[{t:'Типичный день по часам',d:'Реальный, не идеальный.'},{t:'Где в дне ты для себя?',d:'Есть ли хоть один час?'},{t:'3 пожирателя времени',d:'Откуда возьмёшь время на себя.'},{t:'Перерабатываешь из привычки?',d:'Работа как прикрытие от пустоты?'}]},
+{h:'Перестройка',items:[{t:'Жёсткое время окончания работы',d:'После 19:00 — не работаю.'},{t:'Утро — для себя',d:'Первый час без рабочих чатов.'},{t:'Делегировать 1 задачу',d:'Или отказаться.'},{t:'Священный выходной',d:'Один день — ноль работы.'}]},
+{h:'Поддержание',items:[{t:'Каждый вечер: 1 радость',d:'Маленькую. Тренирует замечать.'},{t:'Раз в неделю: жил или выживал?',d:'Если "выживал" — менять.'},{t:'Заменить "нет времени"',d:'На "это не мой приоритет".'}]}
+]},
+mean_a:{t:'Найти направление за 14 дней',e:'🧭',sub:'Остановка, направление, действие',intro:'Правильные вопросы — начало пути.',sec:[
+{h:'Остановка',items:[{t:'30 минут тишины',d:'Без телефона, музыки, людей.'},{t:'Если бы было всё — что бы делал?',d:'Ответ покажет, что важно.'},{t:'Чем горжусь за год?',d:'Если нечем — живёшь чужую жизнь.'},{t:'Чего боюсь больше всего?',d:'Страхи указывают на ценности.'}]},
+{h:'Направление',items:[{t:'3 вещи, от которых чувствую жизнь',d:'Подсказки к направлению.'},{t:'Себя через 5 лет',d:'Нравится картинка?'},{t:'Выбрать 1 сферу для роста',d:'Одну. Рост = выбор.'},{t:'1 цель на 90 дней',d:'Конкретная, измеримая.'}]},
+{h:'Действие',items:[{t:'Каждый день — 1 шаг к цели',d:'15 минут. Регулярность > интенсивность.'},{t:'15 минут развивающего контента',d:'Книга, подкаст. 91 час за год.'},{t:'1 человек, который уже достиг',d:'Изучить его путь.'}]}
+]},
+mean_b:{t:'Выйти с автопилота',e:'🧭',sub:'Осознание, паттерны, смысл',intro:'Выключить автопилот и начать выбирать осознанно.',sec:[
+{h:'Осознание',items:[{t:'Что делаю на автомате?',d:'Карта твоего автопилота.'},{t:'Заменить 1 привычку-автомат',d:'Ломает паттерн, включает мозг.'},{t:'Это МОЙ выбор или инерция?',d:'Применить к 3 вещам.'},{t:'Что бы изменил, если не боялся?',d:'Одну вещь. Самую главную.'}]},
+{h:'Ломать паттерны',items:[{t:'1 вещь, которую никогда не делал',d:'Новый опыт включает мозг.'},{t:'1 день "наоборот"',d:'Другое время, путь, еда.'},{t:'Отказаться от 1 бесполезной привычки',d:'На 14 дней.'},{t:'Дневник — 5 минут перед сном',d:'Что осознанно? Что на автопилоте?'}]},
+{h:'Смысл',items:[{t:'Своё "зачем" одним предложением',d:'Зачем встаёшь каждое утро?'},{t:'Перечитывать "зачем" 14 дней',d:'5 секунд каждое утро.'},{t:'Сказать вслух: хочу изменить жизнь',d:'Другу, брату. Становится реальным.'}]}
+]}
+};
+
+// === CHECKUP STATE ===
+var ckType=0,ckStep=0,ckScores=[0,0,0,0,0,0],ckSel=null,ckSelSphere=null,ckTimer=null,ckTarotIdx=0,ckGivenCL=[];
+
+function ckShowView(id){
+  document.querySelectorAll('#s-checkup .ck-view').forEach(function(v){v.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
 function renderCheckupBadge(){
-  var text=document.getElementById('checkup-status-text');
-  var cta=document.getElementById('checkup-cta');
-  if(!text||!cta)return;
+  var t=document.getElementById('ck-intro-title');
+  var d=document.getElementById('ck-intro-desc');
+  var b=document.getElementById('ck-start-btn');
+  if(!t)return;
   if(userState.checkupTickets>0){
-    text.textContent='У тебя '+userState.checkupTickets+' неиспользованных билет(а/ов) на чекап.';
-    cta.style.display='block';
+    t.textContent='Чекап жизни';
+    d.textContent='У тебя '+userState.checkupTickets+' билет(а/ов) на чекап. Пройди тест и получи персональный чек-лист.';
+    b.style.display='block';
   } else {
-    text.textContent='Выиграй билет на чекап в рулетке, чтобы пройти тест.';
-    cta.style.display='none';
+    t.textContent='Чекап жизни';
+    d.textContent='Выиграй билет на чекап в рулетке, чтобы пройти тест.';
+    b.style.display='none';
   }
 }
-function startCheckup(){
-  showToast('Тест появится в следующем обновлении — билет сохранён');
+
+function ckStart(){
+  if(userState.checkupTickets<=0){showToast('Нет билетов');return;}
+  ckType=Math.floor(Math.random()*5);
+  ckStep=0;ckScores=[0,0,0,0,0,0];ckSel=null;
+  if(ckType===2){ckInitTarot();ckShowView('ck-tarot');}
+  else{ckShowView('ck-play');ckRender();}
 }
+
+// === RENDER STEP ===
+function ckRender(){
+  var nx=document.getElementById('ckNext');
+  nx.disabled=true;nx.style.display='block';ckSel=null;
+  switch(ckType){case 0:ckR1();break;case 1:ckR2();break;case 3:ckR4();break;case 4:ckR5();break;}
+}
+function ckMaxSteps(){return[CK1.length,CK2.length,6,CK4.length,CK5.length][ckType];}
+
+// C1: Questions
+function ckR1(){
+  var q=CK1[ckStep],tot=CK1.length;
+  document.getElementById('ckProg').style.width=(ckStep/tot*100)+'%';
+  document.getElementById('ckStep').textContent='Вопрос '+(ckStep+1)+' из '+tot;
+  var h='<p class="ck-q">'+q.t+'</p><div class="ck-scale">';
+  var lb=['Не про меня','Иногда','Часто','Моя проблема'];
+  for(var i=0;i<4;i++)h+='<div class="ck-scale-btn" onclick="ckSelScale('+i+','+q.s+')" id="cks'+i+'"><span class="sv">'+i+'</span><span class="sd">'+lb[i]+'</span></div>';
+  h+='</div>';document.getElementById('ckContent').innerHTML=h;
+}
+function ckSelScale(v,s){
+  document.querySelectorAll('.ck-scale-btn').forEach(function(b){b.classList.remove('sel');});
+  document.getElementById('cks'+v).classList.add('sel');
+  ckSel={s:s,v:3-v};document.getElementById('ckNext').disabled=false;
+}
+
+// C2: Quick Choices
+var ckTimerVal=0;
+function ckR2(){
+  var q=CK2[ckStep],tot=CK2.length;
+  document.getElementById('ckProg').style.width=(ckStep/tot*100)+'%';
+  document.getElementById('ckStep').textContent='Выбор '+(ckStep+1)+' из '+tot;
+  document.getElementById('ckNext').style.display='none';
+  var h='<div class="ck-timer"><div class="ck-timer-fill" id="ckTF"></div></div><div class="ck-choice">';
+  h+='<div class="ck-ch" onclick="ckSelCh(1,'+q.s+')"><div class="ck-ch-e">'+q.l.e+'</div><div class="ck-ch-t">'+q.l.t+'</div></div>';
+  h+='<div class="ck-ch" onclick="ckSelCh(0,'+q.s+')"><div class="ck-ch-e">'+q.r.e+'</div><div class="ck-ch-t">'+q.r.t+'</div></div></div>';
+  document.getElementById('ckContent').innerHTML=h;
+  ckTimerVal=100;clearInterval(ckTimer);
+  var fill=document.getElementById('ckTF');
+  ckTimer=setInterval(function(){
+    ckTimerVal-=1.67;if(ckTimerVal<=30)fill.classList.add('danger');
+    fill.style.width=Math.max(0,ckTimerVal)+'%';
+    if(ckTimerVal<=0){clearInterval(ckTimer);ckSelCh(0,q.s);}
+  },100);
+}
+function ckSelCh(v,s){
+  clearInterval(ckTimer);
+  var cards=document.querySelectorAll('.ck-ch');cards[v===1?0:1].classList.add('sel');
+  ckSel={s:s,v:v};
+  setTimeout(function(){ckScores[ckSel.s]+=ckSel.v;ckStep++;
+    if(ckStep<ckMaxSteps())ckRender();else ckFinish();
+  },400);
+}
+
+// C3: Tarot
+function ckInitTarot(){
+  var tr=document.getElementById('ckTarotTrack'),dots=document.getElementById('ckTarotDots');
+  tr.innerHTML='';dots.innerHTML='';ckTarotIdx=0;
+  CK3.forEach(function(c,i){
+    var sp=CK_SPHERES[c.s];
+    var d=document.createElement('div');d.className='ck-tc'+(i===0?' act':'');
+    d.onclick=function(e){e.stopPropagation();ckToggleTarot(i);};
+    d.innerHTML='<div class="ck-tc-in"><div class="ck-tc-f" style="background:linear-gradient(135deg,'+sp.color+','+sp.color+'dd)"><div class="tarot-num" style="font-size:14px;color:#fff;opacity:.8">'+['I','II','III','IV','V','VI'][i]+'</div><div style="font-size:36px">'+sp.emoji+'</div><div style="text-align:center"><div style="font-size:11px;font-weight:600;color:#fff">'+sp.name.split(' и ')[0]+'</div></div></div><div class="ck-tc-b" style="background:linear-gradient(135deg,'+sp.color+','+sp.color+'dd)"><p>'+c.d+'</p><button class="ck-btn" style="font-size:11px;padding:6px 12px;margin-top:auto;align-self:center;border-color:#fff;color:#fff;" onclick="event.stopPropagation();ckSelTarot('+c.s+')">Выбрать</button></div></div>';
+    tr.appendChild(d);
+    var dot=document.createElement('div');dot.className='ck-dot'+(i===0?' act':'');dot.onclick=function(){ckGoTarot(i);};dots.appendChild(dot);
+  });
+  ckUpdTarot();
+  var w=document.getElementById('ckTarotWrap');
+  w.addEventListener('wheel',function(e){e.preventDefault();e.deltaY>0?ckTarotNext():ckTarotPrev();},{passive:false});
+  var tx=0;w.addEventListener('touchstart',function(e){tx=e.changedTouches[0].screenX;});
+  w.addEventListener('touchend',function(e){var dx=e.changedTouches[0].screenX-tx;if(dx<-50)ckTarotNext();if(dx>50)ckTarotPrev();});
+}
+function ckUpdTarot(){
+  var cards=document.querySelectorAll('.ck-tc'),dots=document.querySelectorAll('.ck-dot');
+  cards.forEach(function(c,i){c.classList.toggle('act',i===ckTarotIdx);c.classList.remove('flipped');});
+  dots.forEach(function(d,i){d.classList.toggle('act',i===ckTarotIdx);});
+  document.getElementById('ckTarotTrack').style.transform='translateX(calc(50% - 75px + '+(-ckTarotIdx*164)+'px))';
+}
+function ckToggleTarot(i){if(i!==ckTarotIdx)return;var c=document.querySelectorAll('.ck-tc');c.forEach(function(x,j){if(j!==i)x.classList.remove('flipped');});c[i].classList.toggle('flipped');}
+function ckGoTarot(i){ckTarotIdx=i;ckUpdTarot();}
+function ckTarotNext(){ckTarotIdx=(ckTarotIdx+1)%6;ckUpdTarot();}
+function ckTarotPrev(){ckTarotIdx=(ckTarotIdx+5)%6;ckUpdTarot();}
+function ckSelTarot(s){ckScores=[3,3,3,3,3,3];ckScores[s]=0;ckFinish();}
+
+// C4: Scenarios
+function ckR4(){
+  var sc=CK4[ckStep],tot=CK4.length;
+  document.getElementById('ckProg').style.width=(ckStep/tot*100)+'%';
+  document.getElementById('ckStep').textContent='Сценарий '+(ckStep+1)+' из '+tot;
+  var lb=['A','B','C','D'],h='<p class="ck-q">'+sc.t+'</p>';
+  sc.a.forEach(function(a,i){h+='<button class="ck-opt" onclick="ckSelOpt('+i+','+sc.s+','+a.v+')"><span class="gold" style="font-weight:600;margin-right:6px;">'+lb[i]+')</span>'+a.t+'</button>';});
+  document.getElementById('ckContent').innerHTML=h;
+}
+function ckSelOpt(i,s,v){
+  document.querySelectorAll('.ck-opt').forEach(function(b,j){b.classList.toggle('sel',j===i);});
+  ckSel={s:s,v:v};document.getElementById('ckNext').disabled=false;
+}
+
+// C5: Comparison
+function ckR5(){
+  var r=CK5[ckStep],sp=CK_SPHERES[r.s],tot=CK5.length;
+  document.getElementById('ckProg').style.width=(ckStep/tot*100)+'%';
+  document.getElementById('ckStep').innerHTML='Раунд '+(ckStep+1)+' из '+tot+' &nbsp;'+sp.emoji+' '+sp.name;
+  var gs='<svg width="60" height="60" viewBox="0 0 80 80"><circle cx="40" cy="20" r="12" fill="none" stroke="#fff" stroke-width="2"/><circle cx="36" cy="18" r="1.5" fill="#fff"/><circle cx="44" cy="18" r="1.5" fill="#fff"/><path d="M36 23Q40 25 44 23" fill="none" stroke="#fff" stroke-width="1.5"/><line x1="32" y1="37" x2="20" y2="25" stroke="#fff" stroke-width="2"/><line x1="48" y1="37" x2="60" y2="25" stroke="#fff" stroke-width="2"/><rect x="32" y="34" width="16" height="20" fill="none" stroke="#fff" stroke-width="2" rx="2"/><line x1="36" y1="54" x2="34" y2="70" stroke="#fff" stroke-width="2"/><line x1="44" y1="54" x2="46" y2="70" stroke="#fff" stroke-width="2"/></svg>';
+  var bs='<svg width="60" height="60" viewBox="0 0 80 80"><circle cx="40" cy="20" r="12" fill="none" stroke="#fff" stroke-width="2"/><circle cx="36" cy="18" r="1.5" fill="#fff"/><circle cx="44" cy="18" r="1.5" fill="#fff"/><path d="M36 24Q40 22 44 24" fill="none" stroke="#fff" stroke-width="1.5"/><line x1="34" y1="40" x2="22" y2="50" stroke="#fff" stroke-width="2"/><line x1="46" y1="40" x2="58" y2="50" stroke="#fff" stroke-width="2"/><path d="M32 34Q30 44 34 54" fill="none" stroke="#fff" stroke-width="2"/><path d="M48 34Q50 44 46 54" fill="none" stroke="#fff" stroke-width="2"/><line x1="36" y1="54" x2="36" y2="70" stroke="#fff" stroke-width="2"/><line x1="44" y1="54" x2="44" y2="70" stroke="#fff" stroke-width="2"/></svg>';
+  var h='<div class="ck-cmp"><div class="ck-cmp-c" onclick="ckSelCmp(3,'+r.s+')">'+gs+'<div class="ck-cmp-n">'+r.g.n+'</div><div class="ck-cmp-d">'+r.g.d+'</div></div>';
+  h+='<div class="ck-cmp-c" onclick="ckSelCmp(0,'+r.s+')">'+bs+'<div class="ck-cmp-n">'+r.b.n+'</div><div class="ck-cmp-d">'+r.b.d+'</div></div></div>';
+  document.getElementById('ckContent').innerHTML=h;
+}
+function ckSelCmp(v,s){
+  var c=document.querySelectorAll('.ck-cmp-c');c.forEach(function(x){x.classList.remove('sel');});
+  c[v===3?0:1].classList.add('sel');ckSel={s:s,v:v};document.getElementById('ckNext').disabled=false;
+}
+
+// === NEXT / FINISH ===
+function ckNextStep(){
+  if(!ckSel)return;ckScores[ckSel.s]+=ckSel.v;ckStep++;
+  if(ckStep<ckMaxSteps())ckRender();else ckFinish();
+}
+function ckFinish(){
+  clearInterval(ckTimer);ckShowView('ck-loading');
+  setTimeout(ckShowResults,2500);
+}
+
+// === RESULTS ===
+function ckShowResults(){
+  ckShowView('ck-results');ckSelSphere=null;
+  document.getElementById('ckResBtn').disabled=true;
+  var mx=Math.max.apply(null,ckScores)||1;
+  var grid=document.getElementById('ckResGrid');grid.innerHTML='';
+  CK_SPHERES.forEach(function(sp,i){
+    var pct=Math.round(ckScores[i]/mx*100);
+    var cls=pct<40?'s-lo':pct<70?'s-mi':'s-hi';
+    var c=document.createElement('div');c.className='ck-res-c';c.id='ckr'+i;
+    c.onclick=function(){ckPickSphere(i);};
+    c.innerHTML='<div class="ck-res-e">'+sp.emoji+'</div><div class="ck-res-n">'+sp.name+'</div><div class="ck-res-s '+cls+'">'+ckScores[i]+' б.</div>';
+    grid.appendChild(c);
+  });
+}
+function ckPickSphere(i){
+  ckSelSphere=i;
+  document.querySelectorAll('.ck-res-c').forEach(function(c,j){c.classList.toggle('sel',j===i);});
+  document.getElementById('ckResBtn').disabled=false;
+}
+function ckSelectSphere(){
+  if(ckSelSphere===null)return;
+  // Spend ticket
+  userState.checkupTickets=Math.max(0,userState.checkupTickets-1);
+  if(fbDb)fbDb.collection('roulette_spins').doc(myTgId).set({checkupTickets:userState.checkupTickets},{merge:true}).catch(function(){});
+  ckShowChecklist(ckSelSphere);
+}
+
+// === CHECKLIST ===
+function ckShowChecklist(si){
+  ckShowView('ck-checklist');
+  var keys=CL_MAP[si];
+  var key=keys.find(function(k){return ckGivenCL.indexOf(k)===-1;})||keys[0];
+  ckGivenCL.push(key);
+  var cl=CL_DATA[key];
+  document.getElementById('clE').textContent=cl.e;
+  document.getElementById('clT').textContent=cl.t;
+  document.getElementById('clSub').textContent=cl.sub;
+  document.getElementById('clIntro').textContent=cl.intro;
+  var total=0,h='';
+  cl.sec.forEach(function(s){
+    h+='<div class="cl-sec"><h3>'+s.h+'</h3>';
+    s.items.forEach(function(it){
+      h+='<div class="cl-it"><div class="cl-chk" onclick="ckToggle(this)" data-i="'+total+'"></div><div><div class="cl-it-t">'+it.t+'</div><div class="cl-it-d">'+it.d+'</div></div></div>';
+      total++;
+    });h+='</div>';
+  });
+  document.getElementById('clBody').innerHTML=h;
+  document.getElementById('clBody').dataset.total=total;
+  document.getElementById('clBody').dataset.done=0;
+  document.getElementById('clProgT').textContent='0 из '+total+' выполнено';
+  document.getElementById('clProgF').style.width='0%';
+  document.getElementById('clSales50').style.display='none';
+  document.getElementById('clSales100').style.display='none';
+}
+function ckToggle(el){
+  el.classList.toggle('done');
+  var b=document.getElementById('clBody'),tot=parseInt(b.dataset.total);
+  var done=b.querySelectorAll('.cl-chk.done').length;
+  var pct=Math.round(done/tot*100);
+  document.getElementById('clProgT').textContent=done+' из '+tot+' выполнено';
+  document.getElementById('clProgF').style.width=pct+'%';
+  document.getElementById('clSales50').style.display=(pct>=50&&pct<100)?'block':'none';
+  document.getElementById('clSales100').style.display=pct>=100?'block':'none';
+}
+function ckOpenSub(){showToast('Переход к подписке ManClub');}
+function ckDlPdf(){showToast('Генерация PDF...');}
+function ckDlImg(){showToast('Генерация картинки...');}
+function ckBackToIntro(){ckShowView('ck-intro');renderCheckupBadge();}
 
 function renderDemoStatus(){
   var text=document.getElementById('demo-status-text');
