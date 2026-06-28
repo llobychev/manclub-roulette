@@ -462,7 +462,6 @@ function showScreen(id){
 function submitRegistration(){
   var name=document.getElementById('reg-name').value.trim();
   if(!name){showToast('Введи имя');return;}
-  if(!fbDb){initFirebase();}
   if(!fbDb){showToast('Нет подключения к базе');return;}
   var data={id:myTgId,name:name,tgUsername:'',createdAt:Date.now(),source:'sales_app'};
   // Shared user identity: write to the same top-level "users" collection used by
