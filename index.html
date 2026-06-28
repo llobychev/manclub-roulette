@@ -463,7 +463,8 @@ function submitRegistration(){
   var name=document.getElementById('reg-name').value.trim();
   if(!name){showToast('Введи имя');return;}
   if(!fbDb){showToast('Нет подключения к базе');return;}
-  var data={id:myTgId,name:name,tgUsername:'',createdAt:Date.now(),source:'sales_app'};
+  var tgU=(getTg()&&getTg().initDataUnsafe&&getTg().initDataUnsafe.user)||{};
+  var data={id:myTgId,name:name,first:name,last:'',fullName:name,initials:(name[0]||'М').toUpperCase(),tgUsername:tgU.username||name.toLowerCase(),createdAt:Date.now(),registeredAt:Date.now(),source:'sales_app'};
   // Shared user identity: write to the same top-level "users" collection used by
   // the main ManProduction app, keyed by Telegram user id, so either app
   // recognizes a person who registered through the other one.
