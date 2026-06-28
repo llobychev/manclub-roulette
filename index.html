@@ -244,7 +244,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
       <div id="clIntro" style="font-size:12px;color:#ccc;line-height:1.4;margin-bottom:16px;background:var(--bg2);padding:14px;border-radius:8px;"></div>
       <div id="clBody"></div>
       <div class="cl-sales" id="clSales50" style="display:none;"><h3>Ты уже на полпути 💪</h3><p>В клубе есть полная программа по этой сфере с поддержкой, уроками и трекером прогресса.</p><button class="ck-btn" onclick="ckOpenSub()">Узнать больше</button></div>
-      <div class="cl-sales" id="clSales100" style="display:none;"><h3>Чек-лист пройден! 🎉</h3><p>Хочешь глубже? В клубе: персональная программа, видео-уроки, сообщество и трекер прогресса по всем 6 сферам.</p><button class="ck-btn" onclick="ckOpenSub()">Оформить подписку</button></div>
+      <div class="cl-sales" id="clSales100" style="display:none;"><h3>Чек-лист пройден! 🎉</h3><p>Хочешь глубже? В клубе: персональная программа, видео-уроки, сообщество и трекер прогресса по всем 5 сферам.</p><button class="ck-btn" onclick="ckOpenSub()">Оформить подписку</button></div>
       <div class="cl-dl"><button class="ck-btn" onclick="ckDlPdf()">↓ PDF</button><button class="ck-btn" onclick="ckDlImg()">↓ Картинка</button></div>
       <button class="ck-btn" style="margin-top:10px;" onclick="ckBackToIntro()">← Назад</button>
     </div>
@@ -358,11 +358,11 @@ var PRIZE_POOL=[
     desc:'Урок открыт. Появится в разделе Подарки.'},
   {id:'lesson4',cat:'lesson',icon:'📚',title:'Бесплатный урок: Голова',weight:6,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson5',cat:'lesson',icon:'📚',title:'Бесплатный урок: Жизнь',weight:6,minSpin:0,maxSpin:6,
+  {id:'lesson5',cat:'lesson',icon:'📚',title:'Бесплатный урок: Смысл',weight:6,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson6',cat:'lesson',icon:'📚',title:'Бесплатный урок №6',weight:6,minSpin:0,maxSpin:6,
+  {id:'lesson6',cat:'lesson',icon:'📚',title:'Бонусный урок: Дисциплина',weight:6,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson7',cat:'lesson',icon:'📚',title:'Бесплатный урок №7',weight:6,minSpin:0,maxSpin:6,
+  {id:'lesson7',cat:'lesson',icon:'📚',title:'Бонусный урок: Энергия',weight:6,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'}
 ];
 
@@ -462,6 +462,7 @@ function showScreen(id){
 function submitRegistration(){
   var name=document.getElementById('reg-name').value.trim();
   if(!name){showToast('Введи имя');return;}
+  if(!fbDb){initFirebase();}
   if(!fbDb){showToast('Нет подключения к базе');return;}
   var data={id:myTgId,name:name,tgUsername:'',createdAt:Date.now(),source:'sales_app'};
   // Shared user identity: write to the same top-level "users" collection used by
