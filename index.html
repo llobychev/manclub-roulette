@@ -155,6 +155,70 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .cl-sales h3{font-size:15px;font-weight:500;margin-bottom:6px;}
 .cl-sales p{font-size:12px;color:var(--text3);line-height:1.4;margin-bottom:14px;}
 .cl-dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+
+/* === WHEEL LAYOUT === */
+.wheel-wrap{display:flex;flex-direction:column;height:calc(100vh - 130px);min-height:380px;}
+.wheel-pointer-top{display:flex;justify-content:center;padding-top:12px;flex-shrink:0;z-index:10;position:relative;}
+.wheel-crop{flex:1;position:relative;overflow:hidden;display:flex;justify-content:center;align-items:flex-end;}
+.wheel-stage{position:relative;width:420px;height:420px;flex-shrink:0;margin-bottom:-120px;}
+.wheel-svg{width:100%;height:100%;transition:transform 3.6s cubic-bezier(0.17,0.89,0.32,1.27);}
+.wheel-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;background:var(--bg2);border:4px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:26px;z-index:5;}
+.wheel-pointer{width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:29px solid var(--gold);}
+.wheel-bottom-bar{flex-shrink:0;padding:12px 16px 10px;background:var(--bg);border-top:0.5px solid var(--border);}
+.spin-btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--gold);color:#1A1A1A;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none;}
+.spin-btn:disabled{background:var(--bg3);color:var(--text3);cursor:default;}
+.spin-status{margin-top:8px;font-size:12px;color:var(--text2);text-align:center;line-height:1.6;}
+.spin-status .countdown{color:var(--accent2);font-weight:500;}
+
+/* === DEMO === */
+.demo-main-card{background:var(--bg2);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;}
+.demo-active-badge{display:inline-block;background:rgba(46,125,50,0.2);color:#66bb6a;font-size:10px;font-weight:700;border-radius:6px;padding:3px 10px;margin-bottom:8px;}
+.demo-inactive-badge{display:inline-block;background:var(--bg3);color:var(--text3);font-size:10px;font-weight:700;border-radius:6px;padding:3px 10px;margin-bottom:8px;}
+.demo-big-time{font-size:22px;font-weight:700;color:var(--gold);margin:4px 0 2px;}
+.demo-until{font-size:11px;color:var(--text3);margin-bottom:12px;}
+.demo-note{font-size:11px;color:var(--text3);margin-top:8px;}
+.feat-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:8px;margin-bottom:6px;}
+.feat-ok{font-size:16px;flex-shrink:0;}
+.feat-t{font-size:13px;color:var(--text);flex:1;}
+.feat-pill{font-size:10px;background:var(--bg3);color:var(--text3);border-radius:5px;padding:2px 7px;flex-shrink:0;}
+.feat-locked{opacity:0.45;}
+
+/* === PRIZE / LESSON CARDS === */
+.prize-card{background:var(--bg2);border:0.5px solid #2E2E2E;border-radius:10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;padding:11px 13px;}
+.prize-card.expired{opacity:0.38;}
+.prize-emoji{font-size:20px;flex-shrink:0;}
+.prize-info{flex:1;min-width:0;}
+.prize-title{font-size:13px;font-weight:600;color:var(--text);}
+.prize-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.prize-meta.soon{color:#f57c00;}
+.prize-btn{flex-shrink:0;padding:7px 12px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.prize-btn.gold{background:var(--gold);color:#1A1A1A;}
+.prize-btn.gray{background:var(--bg3);color:var(--text3);cursor:default;}
+
+/* === TICKET BANNER === */
+.ticket-wrap{position:relative;background:var(--bg2);border-radius:12px;padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;overflow:hidden;}
+.ticket-wrap::before{content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:var(--bg);}
+.ticket-wrap::after{content:'';position:absolute;right:-10px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:var(--bg);}
+.ticket-dashed{position:absolute;left:20px;right:20px;top:50%;border-top:1px dashed rgba(201,168,76,0.3);}
+.ticket-inner{position:relative;z-index:1;text-align:center;}
+.ticket-count{font-size:24px;font-weight:700;color:var(--gold);}
+.ticket-label{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* === CHECKUP CARDS === */
+.ck-list-card{background:var(--bg2);border:0.5px solid #2E2E2E;border-radius:10px;margin-bottom:8px;overflow:hidden;cursor:pointer;}
+.ck-list-card.active-now{border-color:rgba(201,168,76,0.4);}
+.ck-list-card-row{padding:11px 13px;display:flex;align-items:center;gap:10px;}
+.ck-list-emoji{font-size:20px;flex-shrink:0;}
+.ck-list-info{flex:1;min-width:0;}
+.ck-list-title{font-size:13px;font-weight:600;color:var(--text);}
+.ck-list-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.ck-list-badge{flex-shrink:0;padding:4px 9px;border:none;border-radius:7px;font-size:10px;font-weight:700;white-space:nowrap;}
+.ck-list-badge.gold{background:var(--gold);color:#1A1A1A;}
+.ck-list-badge.inprog{background:rgba(201,168,76,0.15);color:var(--gold);}
+.ck-list-badge.done{background:rgba(46,125,50,0.2);color:#66bb6a;}
+.ck-mini-prog{height:3px;background:var(--bg3);}
+.ck-mini-prog-fill{height:100%;background:var(--gold);}
+.section-label{font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
 </style>
 </head>
 <body>
@@ -179,15 +243,17 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
     <div class="topbar"><div><div class="topbar-logo">🎰 Колесо удачи</div><div class="topbar-sub">Крути раз в день</div></div></div>
     <div class="content">
       <div class="wheel-wrap">
-        <button class="spin-btn" id="spin-btn" onclick="spinWheel()">Крутить</button>
+        <div class="wheel-pointer-top"><div class="wheel-pointer"></div></div>
         <div class="wheel-crop">
           <div class="wheel-stage">
-            <div class="wheel-pointer"></div>
-            <svg class="wheel-svg" id="wheel-svg" viewBox="0 0 300 300"></svg>
+            <svg class="wheel-svg" id="wheel-svg" viewBox="0 0 420 420"></svg>
             <div class="wheel-hub">🎁</div>
           </div>
         </div>
-        <div class="spin-status" id="spin-status"></div>
+        <div class="wheel-bottom-bar">
+          <button class="spin-btn" id="spin-btn" onclick="spinWheel()">Крутить</button>
+          <div class="spin-status" id="spin-status"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -195,12 +261,29 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
   <div class="app-screen" id="s-checkup" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
     <div class="topbar"><div><div class="topbar-logo">🧭 Чекап жизни</div><div class="topbar-sub">Оцени свои сферы</div></div></div>
 
-    <!-- INTRO (no tickets or has tickets) -->
-    <div class="ck-view active" id="ck-intro" style="align-items:center;justify-content:center;text-align:center;padding:40px 24px;">
-      <div style="font-size:56px;margin-bottom:20px;">🔮</div>
-      <div style="font-size:18px;font-weight:500;margin-bottom:8px;" id="ck-intro-title">Чекап жизни</div>
-      <div style="font-size:13px;color:var(--text3);line-height:1.5;margin-bottom:24px;" id="ck-intro-desc">Выиграй билет на чекап в рулетке, чтобы пройти тест.</div>
-      <button class="ck-btn" id="ck-start-btn" style="display:none;" onclick="ckStart()">Пройти чекап</button>
+    <!-- INTRO — ticket banner + checklists list -->
+    <div class="ck-view active" id="ck-intro" style="padding:14px 16px 24px;">
+      <div id="ck-ticket-banner" style="display:none;">
+        <div class="ticket-wrap" id="ck-ticket-wrap"></div>
+        <button class="btn-primary" id="ck-start-btn" style="display:none;margin-bottom:16px;" onclick="ckStart()">Пройти чекап →</button>
+      </div>
+      <div id="ck-no-ticket-msg" style="text-align:center;padding:30px 0 20px;">
+        <div style="font-size:48px;margin-bottom:12px;">🔮</div>
+        <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:8px;">Чекап жизни</div>
+        <div style="font-size:13px;color:var(--text3);line-height:1.5;">Выиграй билет на чекап в рулетке, чтобы пройти тест.</div>
+      </div>
+      <div id="ck-inprogress-section" style="display:none;">
+        <p class="section-label">В процессе</p>
+        <div id="ck-inprogress-list"></div>
+      </div>
+      <div id="ck-available-section" style="display:none;">
+        <p class="section-label" style="margin-top:12px;">Доступные</p>
+        <div id="ck-available-list"></div>
+      </div>
+      <div id="ck-done-section" style="display:none;">
+        <p class="section-label" style="margin-top:12px;">Пройденные</p>
+        <div id="ck-done-list"></div>
+      </div>
     </div>
 
     <!-- GAMEPLAY -->
@@ -252,17 +335,46 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
   <div class="app-screen" id="s-demo" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
     <div class="topbar"><div><div class="topbar-logo">🔑 Демо-доступ</div><div class="topbar-sub">Попробуй ManClub бесплатно</div></div></div>
-    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text" id="demo-status-text">Демо-доступ к основному приложению скоро появится здесь.</div></div>
+    <div class="content">
+      <div class="demo-main-card" id="demo-main-card">
+        <div id="demo-badge-row"></div>
+        <div id="demo-card-body"></div>
+      </div>
+      <div id="demo-features-block" style="display:none;">
+        <p class="section-label" style="margin-top:14px;">Что доступно в демо</p>
+        <div class="feat-row"><span class="feat-ok">✅</span><span class="feat-t">Просмотр уроков</span></div>
+        <div class="feat-row"><span class="feat-ok">✅</span><span class="feat-t">Профиль и 5 сфер</span></div>
+        <div class="feat-row feat-locked"><span class="feat-ok">🔒</span><span class="feat-t">Чат с сообществом</span><span class="feat-pill">Pro</span></div>
+        <div class="feat-row feat-locked"><span class="feat-ok">🔒</span><span class="feat-t">Трекер прогресса</span><span class="feat-pill">Pro</span></div>
+      </div>
+    </div>
   </div>
 
   <div class="app-screen" id="s-gifts" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
-    <div class="topbar"><div><div class="topbar-logo">🎁 Материалы</div><div class="topbar-sub">Чек-листы и подарки</div></div></div>
-    <div class="generic-stub"><div class="generic-stub-icon">🚧</div><div class="generic-stub-text">Чек-листы, призы и материалы скоро появятся здесь.</div></div>
+    <div class="topbar"><div><div class="topbar-logo">🎁 Подарки</div><div class="topbar-sub">Все призы</div></div></div>
+    <div class="content">
+      <div id="gifts-active-section">
+        <p class="section-label">Активные</p>
+        <div id="gifts-active-list"><div class="generic-stub-text" style="padding:20px 0;color:var(--text3);">Ещё нет активных призов. Крути рулетку!</div></div>
+      </div>
+      <div id="gifts-used-section" style="display:none;">
+        <p class="section-label" style="margin-top:14px;">Использованные</p>
+        <div id="gifts-used-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-screen" id="s-lessons" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
+    <div class="topbar"><div><div class="topbar-logo">📚 Уроки</div><div class="topbar-sub">Выиграй в рулетке</div></div></div>
+    <div class="content" id="lessons-content">
+      <div class="generic-stub"><div class="generic-stub-icon">📚</div><div class="generic-stub-text">Крути рулетку, чтобы разблокировать уроки.</div></div>
+    </div>
   </div>
 
   <nav class="bottomnav">
     <div class="nav-item active" id="nav-roulette" onclick="switchTab('roulette')"><div class="nav-icon">🎰</div><div class="nav-label">Рулетка</div></div>
     <div class="nav-item" id="nav-checkup" onclick="switchTab('checkup')"><div class="nav-icon">🧭</div><div class="nav-label">Чекап</div></div>
+    <div class="nav-item" id="nav-lessons" onclick="switchTab('lessons')"><div class="nav-icon">📚</div><div class="nav-label">Уроки</div></div>
     <div class="nav-item" id="nav-demo" onclick="switchTab('demo')"><div class="nav-icon">🔑</div><div class="nav-label">Демо</div></div>
     <div class="nav-item" id="nav-gifts" onclick="switchTab('gifts')"><div class="nav-icon">🎁</div><div class="nav-label">Подарки</div></div>
   </nav>
@@ -314,7 +426,9 @@ var WHEEL_VISUAL=[
   {icon:'🎉',color:'#C9A84C'},{icon:'🎁',color:'#2E2E2E'},
   {icon:'💎',color:'#C9A84C'},{icon:'🔑',color:'#2E2E2E'},
   {icon:'📚',color:'#C9A84C'},{icon:'🎫',color:'#2E2E2E'},
-  {icon:'🔁',color:'#C9A84C'},{icon:'✨',color:'#2E2E2E'}
+  {icon:'🔁',color:'#C9A84C'},{icon:'✨',color:'#2E2E2E'},
+  {icon:'⭐',color:'#C9A84C'},{icon:'🏆',color:'#2E2E2E'},
+  {icon:'🎊',color:'#C9A84C'},{icon:'💫',color:'#2E2E2E'}
 ];
 var WHEEL_SEGMENT_ANGLE=360/WHEEL_VISUAL.length;
 
@@ -488,8 +602,10 @@ function switchTab(tab){
   var screen=document.getElementById('s-'+tab);
   screen.style.display='flex';screen.classList.add('active');
   document.getElementById('nav-'+tab).classList.add('active');
-  if(tab==='checkup')renderCheckupBadge();
-  if(tab==='demo')renderDemoStatus();
+  if(tab==='checkup')renderCheckupTab();
+  if(tab==='demo')renderDemoTab();
+  if(tab==='gifts')renderGiftsTab();
+  if(tab==='lessons')renderLessonsTab();
 }
 
 // === CHECKUP SYSTEM ===
@@ -625,20 +741,93 @@ function ckShowView(id){
   document.getElementById(id).classList.add('active');
 }
 
-function renderCheckupBadge(){
-  var t=document.getElementById('ck-intro-title');
-  var d=document.getElementById('ck-intro-desc');
-  var b=document.getElementById('ck-start-btn');
-  if(!t)return;
-  if(userState.checkupTickets>0){
-    t.textContent='Чекап жизни';
-    d.textContent='У тебя '+userState.checkupTickets+' билет(а/ов) на чекап. Пройди тест и получи персональный чек-лист.';
-    b.style.display='block';
+function renderCheckupBadge(){renderCheckupTab();}
+
+function renderCheckupTab(){
+  var tickets=userState.checkupTickets||0;
+  // ticket banner
+  var banner=document.getElementById('ck-ticket-banner');
+  var noMsg=document.getElementById('ck-no-ticket-msg');
+  var startBtn=document.getElementById('ck-start-btn');
+  if(tickets>0){
+    banner.style.display='block';
+    noMsg.style.display='none';
+    var wrap=document.getElementById('ck-ticket-wrap');
+    wrap.innerHTML='<div class="ticket-dashed"></div><div class="ticket-inner"><div style="font-size:22px;margin-bottom:4px;">🎫</div><div class="ticket-count">'+tickets+'</div><div class="ticket-label">'+(tickets===1?'билет':'билета')+' на чекап</div></div>';
+    startBtn.style.display='block';
   } else {
-    t.textContent='Чекап жизни';
-    d.textContent='Выиграй билет на чекап в рулетке, чтобы пройти тест.';
-    b.style.display='none';
+    banner.style.display='none';
+    noMsg.style.display='block';
+    startBtn.style.display='none';
   }
+  // load saved checklists from Firestore
+  if(!fbDb)return;
+  fbDb.collection('roulette_checklists').doc(myTgId).get().then(function(doc){
+    var data=(doc.exists&&doc.data())||{};
+    var lists=data.lists||[];
+    var inprog=[],avail=[],done=[];
+    lists.forEach(function(l){
+      var pct=l.total>0?Math.round(l.done/l.total*100):0;
+      if(pct>=100)done.push(l);
+      else if(l.done>0)inprog.push(l);
+    });
+    // available = won a ticket but no checklist started yet — show CL_DATA keys not in lists
+    var usedKeys=lists.map(function(l){return l.key;});
+    Object.keys(CL_DATA).forEach(function(k){
+      if(usedKeys.indexOf(k)===-1&&tickets>0){avail.push({key:k,data:CL_DATA[k]});}
+    });
+    renderCkSection('ck-inprogress-section','ck-inprogress-list',inprog,'inprog');
+    renderCkSection('ck-done-section','ck-done-list',done,'done');
+    // avail section
+    var as=document.getElementById('ck-available-section');
+    var al=document.getElementById('ck-available-list');
+    if(avail.length>0){
+      as.style.display='block';
+      al.innerHTML=avail.slice(0,3).map(function(a){
+        return '<div class="ck-list-card" onclick="ckStart()"><div class="ck-list-card-row"><div class="ck-list-emoji">'+a.data.e+'</div><div class="ck-list-info"><div class="ck-list-title">'+a.data.t+'</div><div class="ck-list-meta">'+a.data.sub+'</div></div><span class="ck-list-badge gold">Начать →</span></div></div>';
+      }).join('');
+    } else {
+      as.style.display='none';
+    }
+  }).catch(function(){});
+}
+
+function renderCkSection(secId,listId,items,type){
+  var sec=document.getElementById(secId);
+  var list=document.getElementById(listId);
+  if(!items||items.length===0){sec.style.display='none';return;}
+  sec.style.display='block';
+  list.innerHTML=items.map(function(l){
+    var pct=l.total>0?Math.round(l.done/l.total*100):0;
+    var cl=type==='inprog'?'active-now':'';
+    var badge=type==='inprog'?'<span class="ck-list-badge inprog">В процессе</span>':'<span class="ck-list-badge done">Готово ✓</span>';
+    var bar=type==='inprog'?'<div class="ck-mini-prog"><div class="ck-mini-prog-fill" style="width:'+pct+'%"></div></div>':'<div class="ck-mini-prog"><div class="ck-mini-prog-fill" style="width:100%"></div></div>';
+    var cl_data=CL_DATA[l.key]||{};
+    return '<div class="ck-list-card '+cl+'" onclick="ckOpenSaved(\''+l.key+'\')"><div class="ck-list-card-row"><div class="ck-list-emoji">'+(cl_data.e||'📋')+'</div><div class="ck-list-info"><div class="ck-list-title">'+(l.title||cl_data.t||l.key)+'</div><div class="ck-list-meta">'+(l.done||0)+' из '+(l.total||0)+' выполнено</div></div>'+badge+'</div>'+bar+'</div>';
+  }).join('');
+}
+
+function ckOpenSaved(key){
+  var cl=CL_DATA[key];if(!cl)return;
+  ckShowView('ck-checklist');
+  document.getElementById('clE').textContent=cl.e;
+  document.getElementById('clT').textContent=cl.t;
+  document.getElementById('clSub').textContent=cl.sub;
+  document.getElementById('clIntro').textContent=cl.intro;
+  var total=0,h='';
+  cl.sec.forEach(function(s){
+    h+='<div class="cl-sec"><h3>'+s.h+'</h3>';
+    s.items.forEach(function(it){
+      h+='<div class="cl-it"><div class="cl-chk" onclick="ckToggle(this)"></div><div><div class="cl-it-t">'+it.t+'</div><div class="cl-it-d">'+it.d+'</div></div></div>';
+      total++;
+    });h+='</div>';
+  });
+  document.getElementById('clBody').innerHTML=h;
+  document.getElementById('clBody').dataset.total=total;
+  document.getElementById('clProgT').textContent='0 из '+total+' выполнено';
+  document.getElementById('clProgF').style.width='0%';
+  document.getElementById('clSales50').style.display='none';
+  document.getElementById('clSales100').style.display='none';
 }
 
 function ckStart(){
@@ -841,19 +1030,34 @@ function ckDlPdf(){showToast('Генерация PDF...');}
 function ckDlImg(){showToast('Генерация картинки...');}
 function ckBackToIntro(){ckShowView('ck-intro');renderCheckupBadge();}
 
-function renderDemoStatus(){
-  var text=document.getElementById('demo-status-text');
-  if(!text||!fbDb)return;
+function renderDemoStatus(){renderDemoTab();}
+
+function renderDemoTab(){
+  var card=document.getElementById('demo-main-card');
+  var featBlock=document.getElementById('demo-features-block');
+  if(!card||!fbDb)return;
   fbDb.collection('roulette_active_perks').doc(myTgId).get().then(function(doc){
     var until=(doc.exists&&doc.data().demoAccessUntil)||0;
-    if(until>Date.now()){
+    var now=Date.now();
+    if(until>now){
+      var ms=until-now;
+      var days=Math.ceil(ms/86400000);
       var d=new Date(until);
       var dateStr=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
-      text.textContent='Демо-доступ активен до '+dateStr+'.';
+      card.innerHTML='<div class="demo-active-badge">🟢 АКТИВНО</div><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">Демо-доступ</div><div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Осталось</div><div class="demo-big-time">'+days+' '+(days===1?'день':days<5?'дня':'дней')+'</div><div class="demo-until">до '+dateStr+'</div><button class="btn-primary" onclick="openManClubApp()">Войти в ManClub →</button><div class="demo-note">Не все функции доступны в демо</div>';
+      featBlock.style.display='block';
     } else {
-      text.textContent='Демо-доступ к основному приложению скоро появится здесь.';
+      card.innerHTML='<div class="demo-inactive-badge">⚫ НЕТ ДОСТУПА</div><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">Демо-доступ</div><div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px;">Выиграй демо-доступ в рулетке, чтобы попробовать основное приложение ManClub.</div><button class="btn-primary" onclick="switchTab(\'roulette\')">Крутить рулетку →</button>';
+      featBlock.style.display='none';
     }
   }).catch(function(){});
+}
+
+function openManClubApp(){
+  showToast('Переход в ManClub...');
+  var tg=getTg();
+  if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/games_lis_bot/app');
+  else if(tg&&tg.openLink)tg.openLink('https://t.me/games_lis_bot/app');
 }
 
 // WHEEL DRAWING
@@ -863,7 +1067,7 @@ function polarToCartesian(cx,cy,r,angleDeg){
 }
 function drawWheel(){
   var svg=document.getElementById('wheel-svg');
-  var cx=150,cy=150,r=145;
+  var cx=210,cy=210,r=200;
   var html='';
   WHEEL_VISUAL.forEach(function(seg,i){
     var startAngle=i*WHEEL_SEGMENT_ANGLE;
@@ -871,10 +1075,10 @@ function drawWheel(){
     var start=polarToCartesian(cx,cy,r,startAngle);
     var end=polarToCartesian(cx,cy,r,endAngle);
     var largeArc=WHEEL_SEGMENT_ANGLE>180?1:0;
-    html+='<path d="M'+cx+','+cy+' L'+start.x.toFixed(2)+','+start.y.toFixed(2)+' A'+r+','+r+' 0 '+largeArc+' 1 '+end.x.toFixed(2)+','+end.y.toFixed(2)+' Z" fill="'+seg.color+'" stroke="#0D0D0D" stroke-width="2"/>';
+    html+='<path d="M'+cx+','+cy+' L'+start.x.toFixed(2)+','+start.y.toFixed(2)+' A'+r+','+r+' 0 '+largeArc+' 1 '+end.x.toFixed(2)+','+end.y.toFixed(2)+' Z" fill="'+seg.color+'" stroke="#0D0D0D" stroke-width="1.5"/>';
     var midAngle=startAngle+WHEEL_SEGMENT_ANGLE/2;
-    var iconPos=polarToCartesian(cx,cy,r*0.78,midAngle);
-    html+='<text x="'+iconPos.x.toFixed(2)+'" y="'+iconPos.y.toFixed(2)+'" font-size="22" text-anchor="middle" dominant-baseline="middle">'+seg.icon+'</text>';
+    var iconPos=polarToCartesian(cx,cy,r*0.76,midAngle);
+    html+='<text x="'+iconPos.x.toFixed(2)+'" y="'+iconPos.y.toFixed(2)+'" font-size="24" text-anchor="middle" dominant-baseline="middle">'+seg.icon+'</text>';
   });
   svg.innerHTML=html;
 }
@@ -916,8 +1120,8 @@ function checkSpinAvailability(){
         ?('Осталось доп. попыток сегодня: '+userState.extraSpinsToday)
         :'Один бесплатный спин в день';
     }
-    renderCheckupBadge();
-    renderDemoStatus();
+    renderCheckupTab();
+    renderDemoTab();
   });
 }
 
@@ -1033,6 +1237,91 @@ function showToast(msg){
   t.textContent=msg;t.classList.add('show');
   clearTimeout(t._timer);
   t._timer=setTimeout(function(){t.classList.remove('show');},2200);
+}
+
+
+function renderGiftsTab(){
+  if(!fbDb)return;
+  fbDb.collection('roulette_spins').doc(myTgId).collection('history').orderBy('createdAt','desc').limit(50).get().then(function(snap){
+    var active=[],used=[];
+    var now=Date.now();
+    snap.forEach(function(doc){
+      var d=doc.data();
+      var p=PRIZE_POOL.find(function(x){return x.id===d.prizeId;});
+      if(!p)return;
+      if(p.cat==='spin'){
+        // extra spins are same-day only, mark as used
+        used.push({p:p,date:d.date,createdAt:d.createdAt});
+      } else if(p.cat==='demo'||p.cat==='sub'){
+        // check perk expiry from Firestore — we do a rough guess here
+        active.push({p:p,date:d.date,createdAt:d.createdAt,timed:true});
+      } else if(p.cat==='ticket'){
+        if(userState.checkupTickets>0)active.push({p:p,date:d.date,createdAt:d.createdAt});
+        else used.push({p:p,date:d.date,createdAt:d.createdAt});
+      } else if(p.cat==='discount'){
+        active.push({p:p,date:d.date,createdAt:d.createdAt});
+      } else if(p.cat==='lesson'){
+        used.push({p:p,date:d.date,createdAt:d.createdAt});
+      }
+    });
+    var al=document.getElementById('gifts-active-list');
+    var us=document.getElementById('gifts-used-section');
+    var ul=document.getElementById('gifts-used-list');
+    if(active.length===0){
+      al.innerHTML='<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px;">Ещё нет активных призов.<br>Крути рулетку!</div>';
+    } else {
+      al.innerHTML=active.map(function(item){
+        var btn='';
+        if(item.p.cat==='ticket')btn='<button class="prize-btn gold" onclick="switchTab(\'checkup\')">Использовать</button>';
+        else if(item.p.cat==='discount')btn='<button class="prize-btn gold" onclick="showToast(\'Скидка будет применена при оплате\')">Применить</button>';
+        else if(item.p.cat==='demo')btn='<button class="prize-btn gold" onclick="switchTab(\'demo\')">Перейти</button>';
+        else if(item.p.cat==='sub')btn='<button class="prize-btn gold" onclick="showToast(\'Подписка активируется при входе в клуб\')">Активировать</button>';
+        return '<div class="prize-card"><div class="prize-emoji">'+item.p.icon+'</div><div class="prize-info"><div class="prize-title">'+item.p.title+'</div><div class="prize-meta">Выиграно '+item.date+'</div></div>'+btn+'</div>';
+      }).join('');
+    }
+    if(used.length>0){
+      us.style.display='block';
+      ul.innerHTML=used.map(function(item){
+        return '<div class="prize-card expired"><div class="prize-emoji">'+item.p.icon+'</div><div class="prize-info"><div class="prize-title">'+item.p.title+'</div><div class="prize-meta">'+item.date+'</div></div><button class="prize-btn gray">Готово</button></div>';
+      }).join('');
+    } else {
+      us.style.display='none';
+    }
+  }).catch(function(){});
+}
+
+function renderLessonsTab(){
+  var content=document.getElementById('lessons-content');
+  if(!content||!fbDb)return;
+  fbDb.collection('roulette_spins').doc(myTgId).collection('history').get().then(function(snap){
+    var won=[];
+    snap.forEach(function(doc){
+      var d=doc.data();
+      if(d.prizeCategory==='lesson')won.push(d.prizeId);
+    });
+    var allLessons=PRIZE_POOL.filter(function(p){return p.cat==='lesson';});
+    var unlocked=allLessons.filter(function(p){return won.indexOf(p.id)!==-1;});
+    var locked=allLessons.filter(function(p){return won.indexOf(p.id)===-1;});
+    var html='';
+    if(unlocked.length>0){
+      html+='<p class="section-label">Разблокированные</p>';
+      unlocked.forEach(function(p){
+        html+='<div class="prize-card"><div class="prize-emoji">'+p.icon+'</div><div class="prize-info"><div class="prize-title">'+p.title.replace('Бесплатный урок: ','').replace('Бонусный урок: ','')+'</div><div class="prize-meta">'+p.desc+'</div></div><button class="prize-btn gold" onclick="showToast(\'Урок откроется здесь после добавления видео\')">Смотреть</button></div>';
+      });
+    }
+    if(locked.length>0){
+      html+='<p class="section-label" style="margin-top:'+(unlocked.length>0?'14':'0')+'px;">Заблокированные</p>';
+      locked.forEach(function(p){
+        html+='<div class="prize-card" style="opacity:0.38;"><div class="prize-emoji">'+p.icon+'</div><div class="prize-info"><div class="prize-title">'+p.title.replace('Бесплатный урок: ','').replace('Бонусный урок: ','')+'</div><div class="prize-meta">Выиграй в рулетке</div></div><button class="prize-btn gray">🔒</button></div>';
+      });
+    }
+    if(unlocked.length===0&&locked.length===0){
+      html='<div class="generic-stub"><div class="generic-stub-icon">📚</div><div class="generic-stub-text">Крути рулетку, чтобы разблокировать уроки.</div></div>';
+    }
+    content.innerHTML=html;
+  }).catch(function(){
+    content.innerHTML='<div class="generic-stub"><div class="generic-stub-icon">📚</div><div class="generic-stub-text">Крути рулетку, чтобы разблокировать уроки.</div></div>';
+  });
 }
 
 document.addEventListener('focusin',function(e){
