@@ -177,6 +177,22 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .demo-big-time{font-size:22px;font-weight:700;color:var(--gold);margin:4px 0 2px;}
 .demo-until{font-size:11px;color:var(--text3);margin-bottom:12px;}
 .demo-note{font-size:11px;color:var(--text3);margin-top:8px;}
+/* ===== PAYMENT SCREEN (рулетка) ===== */
+#s-sub{background:var(--bg);}
+.sub-hero{text-align:center;padding:28px 20px 20px;}
+.sub-hero-icon{font-size:40px;margin-bottom:10px;}
+.sub-hero-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.sub-hero-desc{font-size:13px;color:var(--text2);line-height:1.5;}
+.plan-cards{padding:0 14px 8px;}
+.plan-card{background:var(--bg2);border:1.5px solid var(--bg3);border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
+.plan-card.selected{border-color:var(--gold);}
+.plan-card-top{display:flex;justify-content:space-between;align-items:center;}
+.plan-card-name{font-size:15px;font-weight:700;color:var(--text);}
+.plan-card-badge{font-size:10px;font-weight:700;background:rgba(201,168,76,0.18);color:var(--gold);border-radius:6px;padding:2px 8px;}
+.plan-card-price{font-size:13px;color:var(--text2);margin-top:4px;}
+.plan-card-stars{font-size:12px;color:var(--text3);}
+.sub-pay-btn{margin:4px 14px 6px;width:calc(100% - 28px);padding:15px;background:var(--gold);border:none;border-radius:14px;font-size:15px;font-weight:700;color:#1a0f00;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.sub-note{padding:0 16px 24px;font-size:11px;color:var(--text3);text-align:center;line-height:1.6;}
 .feat-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:8px;margin-bottom:6px;}
 .feat-ok{font-size:16px;flex-shrink:0;}
 .feat-t{font-size:13px;color:var(--text);flex:1;}
@@ -374,6 +390,43 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
     <div class="content" id="lessons-content">
       <div class="generic-stub"><div class="generic-stub-icon">📚</div><div class="generic-stub-text">Крути рулетку, чтобы разблокировать уроки.</div></div>
     </div>
+  </div>
+
+  <!-- SCREEN: Подписка ManClub -->
+  <div class="app-screen" id="s-sub" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
+    <div class="topbar">
+      <div><div class="topbar-logo">👑 Подписка ManClub</div><div class="topbar-sub">Полный доступ без ограничений</div></div>
+      <button style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;" onclick="switchTab('roulette')">✕</button>
+    </div>
+    <div class="sub-hero">
+      <div class="sub-hero-icon">👑</div>
+      <div class="sub-hero-title">Полный доступ к ManClub</div>
+      <div class="sub-hero-desc">Все уроки, трекер прогресса по 5 сферам,<br>сообщество и персональная программа.</div>
+    </div>
+    <div class="plan-cards" id="sub-plan-cards">
+      <div class="plan-card selected" id="plan-1m" onclick="selectPlan('1m')">
+        <div class="plan-card-top"><span class="plan-card-name">1 месяц</span></div>
+        <div class="plan-card-price">5 000 ₽ / мес</div>
+        <div class="plan-card-stars">≈ 4 270 ⭐</div>
+      </div>
+      <div class="plan-card" id="plan-3m" onclick="selectPlan('3m')">
+        <div class="plan-card-top"><span class="plan-card-name">3 месяца</span><span class="plan-card-badge">−7%</span></div>
+        <div class="plan-card-price">14 000 ₽ / 3 мес</div>
+        <div class="plan-card-stars">≈ 11 965 ⭐</div>
+      </div>
+      <div class="plan-card" id="plan-6m" onclick="selectPlan('6m')">
+        <div class="plan-card-top"><span class="plan-card-name">6 месяцев</span><span class="plan-card-badge">−10%</span></div>
+        <div class="plan-card-price">27 000 ₽ / 6 мес</div>
+        <div class="plan-card-stars">≈ 23 077 ⭐</div>
+      </div>
+      <div class="plan-card" id="plan-12m" onclick="selectPlan('12m')">
+        <div class="plan-card-top"><span class="plan-card-name">12 месяцев</span><span class="plan-card-badge">−18%</span></div>
+        <div class="plan-card-price">49 000 ₽ / год</div>
+        <div class="plan-card-stars">≈ 41 880 ⭐</div>
+      </div>
+    </div>
+    <button class="sub-pay-btn" id="sub-pay-btn" onclick="startRoulettePayment()">⭐ Оплатить через Telegram Stars</button>
+    <div class="sub-note">После оплаты доступ активируется мгновенно.<br>Вопросы? Пиши <a href="https://t.me/games_lis_bot" style="color:var(--gold);">в поддержку</a>.</div>
   </div>
 
   <nav class="bottomnav">
@@ -1039,7 +1092,55 @@ function ckToggle(el){
   document.getElementById('clSales50').style.display=(pct>=50&&pct<100)?'block':'none';
   document.getElementById('clSales100').style.display=pct>=100?'block':'none';
 }
-function ckOpenSub(){showToast('Переход к подписке ManClub');}
+function ckOpenSub(){
+  // Открываем экран подписки (без навбара — overlay поверх)
+  openSubScreen();
+}
+
+var selectedPlan = '1m';
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
+  var el = document.getElementById('plan-' + plan);
+  if(el) el.classList.add('selected');
+}
+
+function openSubScreen() {
+  // Показываем экран подписки как обычный таб (без nav highlight)
+  document.querySelectorAll('.app-screen').forEach(function(s){s.style.display='none';s.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var screen = document.getElementById('s-sub');
+  screen.style.display = 'flex';
+  screen.classList.add('active');
+  selectPlan('1m'); // сброс выбора
+  trackEvent('sub_screen_open', {});
+}
+
+function startRoulettePayment() {
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if(!tg) { showToast('Только в Telegram'); return; }
+  var chatId = myTgId;
+  if(!chatId) { showToast('Нет данных пользователя'); return; }
+  var btn = document.getElementById('sub-pay-btn');
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ Создаём счёт...'; }
+  fetch('https://llobychev-manproduction-networking-server-6f2d.twc1.net/create-invoice', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ chat_id: chatId, plan: selectedPlan, bot: 'roulette' })
+  }).then(function(r){ return r.json(); }).then(function(data){
+    if(btn) { btn.disabled = false; btn.innerHTML = '⭐ Оплатить через Telegram Stars'; }
+    if(data.ok) {
+      showToast('Счёт отправлен в чат с ботом');
+      trackEvent('payment_initiated', {plan: selectedPlan, bot: 'roulette'});
+    } else {
+      showToast('Ошибка: ' + (data.error || 'попробуй снова'));
+    }
+  }).catch(function(){
+    if(btn) { btn.disabled = false; btn.innerHTML = '⭐ Оплатить через Telegram Stars'; }
+    showToast('Нет соединения с сервером');
+  });
+}
 function ckDlPdf(){showToast('Генерация PDF...');}
 function ckDlImg(){showToast('Генерация картинки...');}
 function ckBackToIntro(){ckShowView('ck-intro');renderCheckupBadge();}
@@ -1333,6 +1434,10 @@ function renderLessonsTab(){
     }
     if(unlocked.length===0&&locked.length===0){
       html='<div class="generic-stub"><div class="generic-stub-icon">📚</div><div class="generic-stub-text">Крути рулетку, чтобы разблокировать уроки.</div></div>';
+    }
+    // После уроков — блок с предложением подписки
+    if(unlocked.length>0){
+      html+='<div style="margin:18px 0 8px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:14px;padding:16px;text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Хочешь все уроки сразу?</div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5;">В полной подписке — вся программа по 5 сферам, трекер прогресса и сообщество.</div><button class="ck-btn" style="margin:0 auto;display:inline-block;" onclick="openSubScreen()">Оформить подписку →</button></div>';
     }
     content.innerHTML=html;
   }).catch(function(){
