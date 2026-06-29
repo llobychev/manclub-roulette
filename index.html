@@ -414,6 +414,20 @@ function initFirebase(){
 }
 
 var myTgId=null;
+// ===== ANALYTICS =====
+function trackEvent(eventName, data) {
+  if(!fbDb || !myTgId) return;
+  try {
+    fbDb.collection('analytics').doc('roulette').collection('events').add({
+      tgId: myTgId,
+      event: eventName,
+      data: data || {},
+      ts: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e) {}
+}
+// ===== END ANALYTICS =====
+
 var myTgName='';
 var myUser=null;
 
@@ -440,43 +454,35 @@ var WHEEL_SEGMENT_ANGLE=360/WHEEL_VISUAL.length;
 // Lesson titles below are placeholders (5 М Protocol spheres + 2 generic) —
 // real titles/topics can be swapped in later without touching the logic.
 var PRIZE_POOL=[
-  {id:'discount5',cat:'discount',icon:'🎉',title:'Скидка 5%',weight:10,minSpin:0,
+  {id:'discount5',cat:'discount',icon:'🎉',title:'Скидка 5%',weight:2,minSpin:0,
     desc:'Скидка 5% при оплате подписки ManClub на 6 месяцев. Не действует при продлении.'},
-  {id:'discount15',cat:'discount',icon:'🎊',title:'Скидка 15%',weight:5,minSpin:9,
+  {id:'discount15',cat:'discount',icon:'🎊',title:'Скидка 15%',weight:3,minSpin:9,
     desc:'Скидка 15% при оплате подписки ManClub ровно на 2 месяца. Не действует при продлении.'},
   {id:'discount50',cat:'discount',icon:'💎',title:'Скидка 50%',weight:1,minSpin:20,
     desc:'Скидка 50% при оплате подписки ManClub на 3 месяца и более. Не действует при продлении.'},
-  {id:'ticket',cat:'ticket',icon:'🎫',title:'Билет на чекап',weight:15,minSpin:0,
+  {id:'ticket',cat:'ticket',icon:'🎫',title:'Билет на чекап',weight:20,minSpin:0,
     desc:'Теперь можно пройти тест и получить персональный чек-лист по своей слабой сфере.'},
-  {id:'sub1',cat:'sub',icon:'🎁',title:'Подписка на 1 месяц',weight:9,minSpin:0,months:1,
+  {id:'sub1',cat:'sub',icon:'🎁',title:'Подписка на 1 месяц',weight:2,minSpin:0,months:1,
     desc:'Бесплатная подписка на основной клуб ManClub на 1 месяц.'},
-  {id:'sub3',cat:'sub',icon:'🎁',title:'Подписка на 3 месяца',weight:3,minSpin:13,months:3,
-    desc:'Бесплатная подписка на основной клуб ManClub на 3 месяца.'},
-  {id:'sub6',cat:'sub',icon:'🎁',title:'Подписка на 6 месяцев',weight:1,minSpin:13,months:6,
-    desc:'Бесплатная подписка на основной клуб ManClub на 6 месяцев.'},
-  {id:'spin2',cat:'spin',icon:'🔁',title:'+2 попытки сегодня',weight:9,minSpin:0,extra:2,
+  {id:'spin2',cat:'spin',icon:'🔁',title:'+2 попытки сегодня',weight:7,minSpin:0,extra:2,
     desc:'Можно крутить колесо ещё 2 раза сегодня.'},
-  {id:'spin4',cat:'spin',icon:'🔁',title:'+4 попытки сегодня',weight:3,minSpin:0,extra:4,
-    desc:'Можно крутить колесо ещё 4 раза сегодня.'},
-  {id:'demo2w',cat:'demo',icon:'🔑',title:'Демо-доступ на 2 недели',weight:14,minSpin:6,days:14,
+  {id:'demo2w',cat:'demo',icon:'🔑',title:'Демо-доступ на 2 недели',weight:11,minSpin:6,days:14,
     desc:'Демо-доступ к основному приложению ManClub на 2 недели.'},
-  {id:'demo1m',cat:'demo',icon:'🔑',title:'Демо-доступ на 1 месяц',weight:9,minSpin:6,days:30,
+  {id:'demo1m',cat:'demo',icon:'🔑',title:'Демо-доступ на 1 месяц',weight:5,minSpin:6,days:30,
     desc:'Демо-доступ к основному приложению ManClub на 1 месяц.'},
-  {id:'demo3m',cat:'demo',icon:'🔑',title:'Демо-доступ на 3 месяца',weight:3,minSpin:6,days:90,
-    desc:'Демо-доступ к основному приложению ManClub на 3 месяца.'},
-  {id:'lesson1',cat:'lesson',icon:'📚',title:'Бесплатный урок: Тело',weight:6,minSpin:0,
+  {id:'lesson1',cat:'lesson',icon:'📚',title:'Бесплатный урок: Тело',weight:7,minSpin:0,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson2',cat:'lesson',icon:'📚',title:'Бесплатный урок: Деньги',weight:6,minSpin:0,
+  {id:'lesson2',cat:'lesson',icon:'📚',title:'Бесплатный урок: Деньги',weight:7,minSpin:0,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson3',cat:'lesson',icon:'📚',title:'Бесплатный урок: Люди',weight:6,minSpin:0,
+  {id:'lesson3',cat:'lesson',icon:'📚',title:'Бесплатный урок: Люди',weight:7,minSpin:0,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson4',cat:'lesson',icon:'📚',title:'Бесплатный урок: Голова',weight:6,minSpin:0,maxSpin:6,
+  {id:'lesson4',cat:'lesson',icon:'📚',title:'Бесплатный урок: Голова',weight:7,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson5',cat:'lesson',icon:'📚',title:'Бесплатный урок: Смысл',weight:6,minSpin:0,maxSpin:6,
+  {id:'lesson5',cat:'lesson',icon:'📚',title:'Бесплатный урок: Смысл',weight:7,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson6',cat:'lesson',icon:'📚',title:'Бонусный урок: Дисциплина',weight:6,minSpin:0,maxSpin:6,
+  {id:'lesson6',cat:'lesson',icon:'📚',title:'Бонусный урок: Дисциплина',weight:7,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson7',cat:'lesson',icon:'📚',title:'Бонусный урок: Энергия',weight:6,minSpin:0,maxSpin:6,
+  {id:'lesson7',cat:'lesson',icon:'📚',title:'Бонусный урок: Энергия',weight:7,minSpin:0,maxSpin:6,
     desc:'Урок открыт. Появится в разделе Подарки.'}
 ];
 
@@ -576,6 +582,7 @@ function showScreen(id){
 function submitRegistration(){
   var name=document.getElementById('reg-name').value.trim();
   if(!name){showToast('Введи имя');return;}
+  trackEvent('registration',{name:name});
   if(!fbDb){showToast('Нет подключения к базе');return;}
   var tgU=(getTg()&&getTg().initDataUnsafe&&getTg().initDataUnsafe.user)||{};
   var data={id:myTgId,name:name,first:name,last:'',fullName:name,initials:(name[0]||'М').toUpperCase(),tgUsername:tgU.username||name.toLowerCase(),createdAt:Date.now(),registeredAt:Date.now(),source:'sales_app'};
@@ -594,6 +601,7 @@ function submitRegistration(){
 function launchApp(){
   showScreen('main-app');
   checkSpinAvailability();
+  trackEvent('app_open',{});
 }
 
 function switchTab(tab){
@@ -606,6 +614,7 @@ function switchTab(tab){
   if(tab==='demo')renderDemoTab();
   if(tab==='gifts')renderGiftsTab();
   if(tab==='lessons')renderLessonsTab();
+  trackEvent('tab_switch',{tab:tab});
 }
 
 // === CHECKUP SYSTEM ===
@@ -1133,6 +1142,7 @@ function spinWheel(){
   document.getElementById('spin-btn').disabled=true;
 
   var prize=pickWeightedPrize(userState.totalSpins);
+  trackEvent('spin_start',{totalSpins:userState.totalSpins});
 
   // Decorative landing only — random visual segment, unrelated to the real prize.
   var visualIdx=Math.floor(Math.random()*WHEEL_VISUAL.length);
@@ -1165,6 +1175,7 @@ function applyPrizeAndRecord(prize,wasSpunToday){
     checkupTickets:newTickets
   };
 
+  trackEvent('spin_result',{prizeId:prize.id,prizeCategory:prize.cat,totalSpins:userState.totalSpins+1});
   fbDb.collection('roulette_spins').doc(myTgId).set(updates,{merge:true}).then(function(){
     fbDb.collection('roulette_spins').doc(myTgId).collection('history').add({
       prizeId:prize.id,prizeTitle:prize.title,prizeCategory:prize.cat,
