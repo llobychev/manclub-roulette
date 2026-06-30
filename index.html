@@ -1127,12 +1127,12 @@ function startRoulettePayment() {
   fetch('https://llobychev-manproduction-networking-server-6f2d.twc1.net/create-invoice', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ chat_id: chatId, plan: selectedPlan, bot: 'roulette' })
+    body: JSON.stringify({ chat_id: chatId, plan: selectedPlan, bot: 'main' })
   }).then(function(r){ return r.json(); }).then(function(data){
     if(btn) { btn.disabled = false; btn.innerHTML = '⭐ Оплатить через Telegram Stars'; }
     if(data.ok) {
       showToast('Счёт отправлен в чат с ботом');
-      trackEvent('payment_initiated', {plan: selectedPlan, bot: 'roulette'});
+      trackEvent('payment_initiated', {plan: selectedPlan, bot: 'main'});
     } else {
       showToast('Ошибка: ' + (data.error || 'попробуй снова'));
     }
