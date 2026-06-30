@@ -1744,5 +1744,352 @@ function cpShowLegal(doc){
 </script>
 <!-- ===== /ЮРИДИЧЕСКИЕ ДОКУМЕНТЫ ===== -->
 
+
+<style>
+.lv-fab{position:fixed;right:14px;bottom:80px;z-index:500;width:54px;height:54px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 6px 16px rgba(0,0,0,.5);border:2px solid var(--bg);cursor:pointer;}
+.lv-fab.hidden{display:none;}
+.lv-fab-dot{position:absolute;top:-3px;right:-3px;width:11px;height:11px;background:#E2453D;border-radius:50%;border:2px solid var(--bg);}
+.lv-chat{position:fixed;inset:0;z-index:600;background:var(--bg);display:none;flex-direction:column;max-width:480px;margin:0 auto;}
+.lv-chat.active{display:flex;}
+.lv-chat-head{display:flex;align-items:center;gap:10px;padding:16px;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.lv-chat-head .lv-av{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.lv-chat-head .lv-nm b{display:block;color:var(--text);font-size:14px;}
+.lv-chat-head .lv-nm span{color:var(--gold);font-size:11px;}
+.lv-chat-head .lv-x{margin-left:auto;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;}
+.lv-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.lv-bubble{max-width:80%;padding:10px 14px;border-radius:14px;font-size:12.5px;line-height:1.45;white-space:pre-wrap;}
+.lv-bubble.bot{background:var(--bg2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;}
+.lv-bubble.user{background:var(--gold);color:#1A1A1A;align-self:flex-end;border-bottom-right-radius:4px;font-weight:600;}
+.lv-actions{display:flex;flex-wrap:wrap;gap:8px;}
+.lv-actions button{border-radius:18px;padding:7px 13px;font-size:11px;cursor:pointer;border:1px solid var(--gold);background:transparent;color:var(--gold);}
+.lv-actions button.lv-primary{background:var(--gold);color:#1A1A1A;font-weight:700;border:none;}
+.lv-chat-input{display:flex;gap:8px;padding:12px 16px;border-top:0.5px solid var(--border);flex-shrink:0;}
+.lv-chat-input input{flex:1;background:var(--bg2);border:none;border-radius:20px;padding:10px 14px;color:var(--text);font-size:12px;outline:none;}
+.lv-chat-input .lv-snd{width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#1A1A1A;font-weight:700;flex-shrink:0;cursor:pointer;}
+.lv-hl{position:fixed;z-index:540;border:2px dashed var(--gold);border-radius:16px;display:none;pointer-events:none;transition:all .3s;}
+.lv-hl.active{display:block;}
+.lv-tt{position:fixed;z-index:550;left:16px;right:16px;background:var(--bg2);border:1px solid var(--gold);border-radius:12px;padding:14px;color:var(--text);font-size:12px;display:none;max-width:448px;margin:0 auto;}
+.lv-tt.active{display:block;}
+.lv-tt b{display:block;color:var(--gold);font-size:13px;margin-bottom:4px;}
+.lv-tt-nav{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.lv-tt-nav span{font-size:11px;color:var(--text3);}
+.lv-tt-nav button{background:var(--gold);color:#1A1A1A;border:none;padding:6px 14px;border-radius:14px;font-size:11px;font-weight:700;cursor:pointer;}
+.lv-skip{position:fixed;z-index:550;top:16px;right:16px;color:var(--text3);font-size:11px;display:none;cursor:pointer;background:var(--bg2);padding:6px 10px;border-radius:10px;}
+.lv-skip.active{display:block;}
+.lv-final{position:fixed;inset:0;z-index:700;background:rgba(13,13,13,.95);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;max-width:480px;margin:0 auto;}
+.lv-final.active{display:flex;}
+.lv-final .lv-dots{display:flex;gap:6px;margin-bottom:18px;}
+.lv-final .lv-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);}
+.lv-final .lv-dots span.d{background:var(--gold);}
+.lv-final .lv-av{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:20px;}
+.lv-final h3{color:var(--text);font-size:16px;margin-bottom:8px;}
+.lv-final p{color:var(--text2);font-size:12px;line-height:1.5;margin-bottom:24px;}
+.lv-final button{background:var(--gold);color:#1A1A1A;border:none;padding:12px 28px;border-radius:24px;font-weight:700;font-size:13px;cursor:pointer;}
+</style>
+
+<div class="lv-fab" id="lvFab"><span>L</span><div class="lv-fab-dot" id="lvFabDot"></div></div>
+
+<div class="lv-chat" id="lvChat">
+  <div class="lv-chat-head">
+    <div class="lv-av">L</div>
+    <div class="lv-nm"><b>Lyova</b><span>Mentor . Brother . Leader</span></div>
+    <div class="lv-x" id="lvChatClose">x</div>
+  </div>
+  <div class="lv-chat-body" id="lvChatBody"></div>
+  <div class="lv-chat-input">
+    <input id="lvChatInput" placeholder="Sprosi Lyovu...">
+    <div class="lv-snd" id="lvChatSend">&gt;</div>
+  </div>
+</div>
+
+<div class="lv-hl" id="lvHl"></div>
+<div class="lv-tt" id="lvTt">
+  <b id="lvTtTitle"></b>
+  <div id="lvTtText"></div>
+  <div class="lv-tt-nav">
+    <span id="lvTtProgress"></span>
+    <button id="lvTtNext">Dalshe</button>
+  </div>
+</div>
+<div class="lv-skip" id="lvSkip">Propustit tur</div>
+
+<div class="lv-final" id="lvFinal">
+  <div class="lv-dots">
+    <span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span>
+  </div>
+  <div class="lv-av">L</div>
+  <h3>Gotovo, bro</h3>
+  <p id="lvFinalText"></p>
+  <button id="lvFinalClose">Ponyal, poghali</button>
+</div>
+
+<script>
+var LV_KNOWLEDGE_SEED=[{"intentId": "where_progress", "category": "navigation", "triggers": ["progress", "sfery", "gde rezultat", "chekap rezultaty", "сфер", "прогресс", "результат"], "answer": "Это во вкладке Чекап — там твоя карта по 5 сферам. Открыть?", "navAction": "checkup", "quickReplies": [{"label": "Открыть Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "where_lessons", "category": "navigation", "triggers": ["уроки", "видео", "обучение", "где учиться"], "answer": "Видео-уроки лежат во вкладке Уроки. Открыть?", "navAction": "lessons", "quickReplies": [{"label": "Открыть Уроки", "action": "nav:lessons"}], "priority": 10, "active": true}, {"intentId": "where_demo_timer", "category": "navigation", "triggers": ["демо", "сколько осталось", "пробный период", "когда закончится"], "answer": "Таймер демо-доступа во вкладке Демо. Открыть?", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "where_gifts", "category": "navigation", "triggers": ["подарки", "призы", "что выиграл", "мои выигрыши"], "answer": "Все твои призы из рулетки — во вкладке Подарки.", "navAction": "gifts", "quickReplies": [{"label": "Открыть Подарки", "action": "nav:gifts"}], "priority": 10, "active": true}, {"intentId": "what_is_roulette", "category": "mechanics", "triggers": ["рулетка", "крутить", "как работает рулетка", "что такое рулетка"], "answer": "Рулетка — твой ежедневный ритуал. Раз в день крутишь колесо, выпадает приз или билет. Доступно раз в 24 часа.", "navAction": null, "quickReplies": [{"label": "А что такое Чекап?", "action": "intent:what_is_checkup"}], "priority": 10, "active": true}, {"intentId": "what_is_checkup", "category": "mechanics", "triggers": ["чекап", "диагностика", "тест по сферам", "что такое чекап"], "answer": "Чекап — диагностика по 5 сферам жизни: Тело, Деньги, Люди, Голова, Смысл. Проходишь тест, узнаёшь, какая сфера слабее всего.", "navAction": "checkup", "quickReplies": [{"label": "Пройти Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "what_is_checklist", "category": "mechanics", "triggers": ["чек-лист", "чеклист", "задания", "что делать дальше"], "answer": "Чек-лист — список конкретных заданий по твоей слабой сфере. Выдаётся после прохождения Чекапа.", "navAction": null, "quickReplies": [{"label": "Пройти Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "roulette_vs_checkup", "category": "mechanics", "triggers": ["разница", "рулетка и чекап", "не понимаю систему", "это связано"], "answer": "Рулетка и Чекап — два разных контура. Рулетка крутится каждый день ради призов. Чекап проходишь отдельно, когда готов разобраться в себе — и получаешь чек-лист.", "navAction": null, "quickReplies": [], "priority": 15, "active": true}, {"intentId": "how_demo_works", "category": "mechanics", "triggers": ["как работает демо", "что после демо", "демо закончится"], "answer": "Демо — пробный доступ ко всему на ограниченное время. Когда оно закончится, оформляешь полный доступ, и всё продолжает работать без ограничений.", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "what_is_manclub", "category": "faq", "triggers": ["что такое манклаб", "что за клуб", "manclub"], "answer": "ManClub in Siberia — мужской клуб саморазвития. Работаем по 5 сферам жизни через рулетку, диагностику и чек-листы.", "navAction": null, "quickReplies": [], "priority": 10, "active": true}, {"intentId": "how_to_get_full_access", "category": "faq", "triggers": ["полный доступ", "оформить", "убрать ограничения", "купить подписку"], "answer": "Когда демо закончится, нажми «Убрать ограничения» в Демо — там варианты оформления.", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "lost_progress", "category": "faq", "triggers": ["пропал прогресс", "сбросился", "потерял данные"], "answer": "Прогресс хранится по твоему Telegram-аккаунту, не должен пропадать. Если что-то не так — напиши в поддержку клуба.", "navAction": null, "quickReplies": [], "priority": 12, "active": true}, {"intentId": "spin_not_working", "category": "faq", "triggers": ["не крутится", "кнопка не работает", "рулетка зависла", "баг"], "answer": "Если кнопка «Крутить» неактивна — скорее всего, лимит на сегодня уже использован. Проверь таймер под кнопкой.", "navAction": "roulette", "quickReplies": [{"label": "Открыть Рулетку", "action": "nav:roulette"}], "priority": 12, "active": true}, {"intentId": "fallback_no_match", "category": "support", "triggers": [], "answer": "Хм, не понял вопрос. Можешь переформулировать, или жми кнопку ниже.", "navAction": null, "quickReplies": [{"label": "Начать обучение", "action": "tutorial:start"}], "priority": 0, "active": true}];
+var LV_TUTORIAL_SEED=[{"stepId": "step_1", "order": 1, "screen": "roulette", "targetSelector": ".wheel-stage", "title": "Ежедневная рулетка", "text": "Здарова! Это твоя ежедневная рулетка. Раз в день крутишь колесо — выпадает приз или билет.", "type": "highlight", "tab": "roulette"}, {"stepId": "step_2", "order": 2, "screen": "roulette", "targetSelector": "#spin-btn", "title": "Кнопка крутить", "text": "Жми сюда раз в 24 часа. Что выпадет — то и забираешь.", "type": "highlight", "tab": "roulette"}, {"stepId": "step_3", "order": 3, "screen": "checkup", "targetSelector": "#nav-checkup", "title": "Диагностика", "text": "Это отдельная история. Чекап — тест по 5 сферам жизни, не связан с рулеткой напрямую.", "type": "highlight", "tab": "checkup"}, {"stepId": "step_4", "order": 4, "screen": "checkup", "targetSelector": "#ckResGrid", "title": "Результаты", "text": "После теста увидишь, какая сфера слабее всего. Это точка входа для работы.", "type": "highlight", "tab": "checkup"}, {"stepId": "step_5", "order": 5, "screen": "checkup", "targetSelector": ".cl-sec", "title": "Чек-лист", "text": "По итогам Чекапа выдаётся чек-лист — конкретные задания под твою слабую сферу.", "type": "highlight", "tab": "checkup"}, {"stepId": "step_6", "order": 6, "screen": "lessons", "targetSelector": "#nav-lessons", "title": "Уроки", "text": "Видео-уроки по сферам. Можешь идти по порядку или открывать нужное под слабую сферу.", "type": "highlight", "tab": "lessons"}, {"stepId": "step_7", "order": 7, "screen": "demo", "targetSelector": ".demo-big-time", "title": "Демо-доступ", "text": "Сейчас у тебя демо-период. Здесь видно, сколько времени осталось.", "type": "highlight", "tab": "demo"}, {"stepId": "step_8", "order": 8, "screen": "demo", "targetSelector": ".demo-main-card .btn-primary", "title": "После демо", "text": "Когда демо закончится, тут оформляешь полный доступ.", "type": "highlight", "tab": "demo"}, {"stepId": "step_9", "order": 9, "screen": "gifts", "targetSelector": "#nav-gifts", "title": "Подарки", "text": "Сюда падают призы из рулетки. Заглядывай, чтобы не сгорело.", "type": "highlight", "tab": "gifts"}, {"stepId": "step_final", "order": 10, "screen": null, "targetSelector": null, "title": "Готово", "text": "Главное: рулетка — ритуал, Чекап — диагностика, чек-лист — план действий. Если запутаешься — жми на меня.", "type": "final", "tab": null}];
+var lvKnowledge=[];
+var lvTutorialSteps=[];
+var lvTutorialIndex=0;
+var lvTutorialRunning=false;
+
+function lvLoadKnowledge(cb){
+  if(!fbDb){lvKnowledge=LV_KNOWLEDGE_SEED;cb&&cb();return;}
+  fbDb.collection('lyova_knowledge').get().then(function(snap){
+    if(snap.empty){
+      var batch=fbDb.batch();
+      LV_KNOWLEDGE_SEED.forEach(function(item){
+        var ref=fbDb.collection('lyova_knowledge').doc(item.intentId);
+        batch.set(ref,item);
+      });
+      batch.commit().catch(function(e){console.warn('seed knowledge failed',e);});
+      lvKnowledge=LV_KNOWLEDGE_SEED;
+    }else{
+      lvKnowledge=[];
+      snap.forEach(function(doc){lvKnowledge.push(doc.data());});
+    }
+    cb&&cb();
+  }).catch(function(e){console.warn('load knowledge failed',e);lvKnowledge=LV_KNOWLEDGE_SEED;cb&&cb();});
+}
+
+function lvLoadTutorial(cb){
+  if(!fbDb){lvTutorialSteps=LV_TUTORIAL_SEED;cb&&cb();return;}
+  fbDb.collection('tutorial_steps').get().then(function(snap){
+    if(snap.empty){
+      var batch=fbDb.batch();
+      LV_TUTORIAL_SEED.forEach(function(item){
+        var ref=fbDb.collection('tutorial_steps').doc(item.stepId);
+        batch.set(ref,item);
+      });
+      batch.commit().catch(function(e){console.warn('seed tutorial failed',e);});
+      lvTutorialSteps=LV_TUTORIAL_SEED;
+    }else{
+      lvTutorialSteps=[];
+      snap.forEach(function(doc){lvTutorialSteps.push(doc.data());});
+      lvTutorialSteps.sort(function(a,b){return a.order-b.order;});
+    }
+    cb&&cb();
+  }).catch(function(e){console.warn('load tutorial failed',e);lvTutorialSteps=LV_TUTORIAL_SEED;cb&&cb();});
+}
+
+function lvNormalize(s){return (s||'').toLowerCase().replace(/[.,!?;:()"]/g,'').trim();}
+
+function lvMatchIntent(text){
+  var t=lvNormalize(text);
+  var best=null;
+  lvKnowledge.forEach(function(item){
+    if(!item.active)return;
+    if(item.intentId==='fallback_no_match')return;
+    var hit=(item.triggers||[]).some(function(trig){return t.indexOf(lvNormalize(trig))!==-1 && trig.length>0;});
+    if(hit){
+      if(!best||item.priority>best.priority)best=item;
+    }
+  });
+  if(best)return best;
+  return lvKnowledge.filter(function(i){return i.intentId==='fallback_no_match';})[0]||LV_KNOWLEDGE_SEED[LV_KNOWLEDGE_SEED.length-1];
+}
+
+function lvGetIntentById(id){
+  var found=lvKnowledge.filter(function(i){return i.intentId===id;})[0];
+  return found||null;
+}
+
+function lvRenderBubble(text,who){
+  var body=document.getElementById('lvChatBody');
+  var div=document.createElement('div');
+  div.className='lv-bubble '+who;
+  div.textContent=text;
+  body.appendChild(div);
+  body.scrollTop=body.scrollHeight;
+}
+
+function lvRenderActions(quickReplies){
+  if(!quickReplies||!quickReplies.length)return;
+  var body=document.getElementById('lvChatBody');
+  var wrap=document.createElement('div');
+  wrap.className='lv-actions';
+  quickReplies.forEach(function(qr){
+    var btn=document.createElement('button');
+    btn.textContent=qr.label;
+    if(qr.action&&qr.action.indexOf('nav:')===0)btn.className='lv-primary';
+    btn.onclick=function(){lvHandleAction(qr.action,qr.label);};
+    wrap.appendChild(btn);
+  });
+  body.appendChild(wrap);
+  body.scrollTop=body.scrollHeight;
+}
+
+function lvHandleAction(action,label){
+  lvRenderBubble(label,'user');
+  if(action.indexOf('nav:')===0){
+    var tab=action.slice(4);
+    lvCloseChat();
+    switchTab(tab);
+    return;
+  }
+  if(action.indexOf('intent:')===0){
+    var id=action.slice(7);
+    var item=lvGetIntentById(id);
+    if(item){
+      lvRenderBubble(item.answer,'bot');
+      lvRenderActions(item.quickReplies);
+    }
+    return;
+  }
+  if(action==='tutorial:start'){
+    lvCloseChat();
+    lvStartTutorial();
+    return;
+  }
+}
+
+function lvSendMessage(){
+  var input=document.getElementById('lvChatInput');
+  var text=input.value.trim();
+  if(!text)return;
+  lvRenderBubble(text,'user');
+  input.value='';
+  var item=lvMatchIntent(text);
+  setTimeout(function(){
+    lvRenderBubble(item.answer,'bot');
+    lvRenderActions(item.quickReplies);
+    if(fbDb&&myTgId){
+      fbDb.collection('users').doc(myTgId).set({lastChatIntent:item.intentId},{merge:true}).catch(function(){});
+    }
+  },300);
+}
+
+function lvOpenChat(){
+  document.getElementById('lvChat').classList.add('active');
+  document.getElementById('lvFab').classList.add('hidden');
+  var body=document.getElementById('lvChatBody');
+  if(!body.children.length){
+    lvRenderBubble('Здарова! Я Лёва. Помогу разобраться в приложении или отвечу на вопрос. Чё надо?','bot');
+    lvRenderActions([
+      {label:'Что такое рулетка?',action:'intent:what_is_roulette'},
+      {label:'Что такое Чекап?',action:'intent:what_is_checkup'},
+      {label:'Начать обучение',action:'tutorial:start'}
+    ]);
+  }
+  if(fbDb&&myTgId){
+    fbDb.collection('users').doc(myTgId).set({chatOpenedCount:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(function(){});
+  }
+}
+
+function lvCloseChat(){
+  document.getElementById('lvChat').classList.remove('active');
+  document.getElementById('lvFab').classList.remove('hidden');
+}
+
+function lvPositionHighlight(selector){
+  var hl=document.getElementById('lvHl');
+  var tt=document.getElementById('lvTt');
+  var el=selector?document.querySelector(selector):null;
+  if(!el){
+    hl.classList.remove('active');
+    tt.style.top='120px';
+    return;
+  }
+  var rect=el.getBoundingClientRect();
+  var pad=8;
+  hl.style.top=(rect.top-pad)+'px';
+  hl.style.left=(rect.left-pad)+'px';
+  hl.style.width=(rect.width+pad*2)+'px';
+  hl.style.height=(rect.height+pad*2)+'px';
+  hl.classList.add('active');
+  var ttTop=rect.bottom+16;
+  if(ttTop>window.innerHeight-160)ttTop=Math.max(60,rect.top-150);
+  tt.style.top=ttTop+'px';
+}
+
+function lvShowTutorialStep(i){
+  if(i>=lvTutorialSteps.length){lvFinishTutorial();return;}
+  var step=lvTutorialSteps[i];
+  lvTutorialIndex=i;
+  if(step.type==='final'){
+    document.getElementById('lvTt').classList.remove('active');
+    document.getElementById('lvHl').classList.remove('active');
+    document.getElementById('lvSkip').classList.remove('active');
+    document.getElementById('lvFinalText').textContent=step.text;
+    document.getElementById('lvFinal').classList.add('active');
+    return;
+  }
+  if(step.tab)switchTab(step.tab);
+  document.getElementById('lvFab').classList.add('hidden');
+  setTimeout(function(){
+    lvPositionHighlight(step.targetSelector);
+    document.getElementById('lvTtTitle').textContent=step.title;
+    document.getElementById('lvTtText').textContent=step.text;
+    document.getElementById('lvTtProgress').textContent=(i+1)+' iz '+lvTutorialSteps.length;
+    document.getElementById('lvTt').classList.add('active');
+    document.getElementById('lvSkip').classList.add('active');
+  },250);
+}
+
+function lvNextTutorialStep(){lvShowTutorialStep(lvTutorialIndex+1);}
+
+function lvStartTutorial(){
+  lvTutorialRunning=true;
+  lvTutorialIndex=0;
+  lvShowTutorialStep(0);
+  if(fbDb&&myTgId){
+    fbDb.collection('tutorial_progress').doc(myTgId).set({tgId:myTgId,completed:false,lastStep:0,startedAt:firebase.firestore.FieldValue.serverTimestamp(),triggeredBy:'manual'},{merge:true}).catch(function(){});
+  }
+}
+
+function lvFinishTutorial(){
+  lvTutorialRunning=false;
+  document.getElementById('lvFab').classList.remove('hidden');
+  if(fbDb&&myTgId){
+    fbDb.collection('users').doc(myTgId).set({tutorialCompleted:true,tutorialLastStep:lvTutorialSteps.length},{merge:true}).catch(function(){});
+    fbDb.collection('tutorial_progress').doc(myTgId).set({completed:true,completedAt:firebase.firestore.FieldValue.serverTimestamp(),lastStep:lvTutorialSteps.length},{merge:true}).catch(function(){});
+  }
+}
+
+function lvSkipTutorial(){
+  document.getElementById('lvTt').classList.remove('active');
+  document.getElementById('lvHl').classList.remove('active');
+  document.getElementById('lvSkip').classList.remove('active');
+  lvFinishTutorial();
+}
+
+function lvAutoCheckTutorial(){
+  if(!fbDb||!myTgId){return;}
+  fbDb.collection('users').doc(myTgId).get().then(function(doc){
+    var data=doc.exists?doc.data():{};
+    if(!data.tutorialCompleted){
+      setTimeout(function(){
+        lvTutorialRunning=true;
+        lvTutorialIndex=0;
+        lvShowTutorialStep(0);
+        fbDb.collection('tutorial_progress').doc(myTgId).set({tgId:myTgId,completed:false,lastStep:0,startedAt:firebase.firestore.FieldValue.serverTimestamp(),triggeredBy:'auto'},{merge:true}).catch(function(){});
+      },1200);
+    }
+  }).catch(function(){});
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('lvFab').addEventListener('click',lvOpenChat);
+  document.getElementById('lvChatClose').addEventListener('click',lvCloseChat);
+  document.getElementById('lvChatSend').addEventListener('click',lvSendMessage);
+  document.getElementById('lvChatInput').addEventListener('keypress',function(e){if(e.key==='Enter')lvSendMessage();});
+  document.getElementById('lvTtNext').addEventListener('click',lvNextTutorialStep);
+  document.getElementById('lvSkip').addEventListener('click',lvSkipTutorial);
+  document.getElementById('lvFinalClose').addEventListener('click',function(){
+    document.getElementById('lvFinal').classList.remove('active');
+  });
+});
+
+var lvInitTimer=setInterval(function(){
+  if(fbDb!==null||myTgId!==null){
+    clearInterval(lvInitTimer);
+    lvLoadKnowledge(function(){
+      lvLoadTutorial(function(){
+        lvAutoCheckTutorial();
+      });
+    });
+  }
+},400);
+setTimeout(function(){clearInterval(lvInitTimer);},8000);
+</script>
+
 </body>
 </html>
