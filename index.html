@@ -279,6 +279,13 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
     <!-- INTRO — ticket banner + checklists list -->
     <div class="ck-view active" id="ck-intro" style="padding:14px 16px 24px;">
+      <div id="ck-resume-banner" style="display:none;background:var(--bg2);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+        <div class="ck-resume-txt" style="font-size:13px;color:var(--text);margin-bottom:8px;">У тебя есть незавершённый чекап</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-primary" style="flex:1;" onclick="ckResume()">Продолжить</button>
+          <button class="btn-primary" style="flex:1;background:var(--bg3);" onclick="ckStartFresh()">Начать заново</button>
+        </div>
+      </div>
       <div id="ck-ticket-banner" style="display:none;">
         <div class="ticket-wrap" id="ck-ticket-wrap"></div>
         <button class="btn-primary" id="ck-start-btn" style="display:none;margin-bottom:16px;" onclick="ckStart()">Пройти чекап →</button>
@@ -425,14 +432,8 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
         <div class="plan-card-stars">≈ 41 880 ⭐</div>
       </div>
     </div>
-    <div style="margin:0 14px 12px;background:var(--bg2);border:0.5px solid var(--bg3);border-radius:14px;padding:16px;">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Переведи на карту</div>
-      <div style="font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px;margin-bottom:4px;" id="sub-card-number">2200 0117 9022 3078</div>
-      <div style="font-size:12px;color:var(--text3);">Газпромбанк · Оксана Л.</div>
-      <button style="margin-top:10px;background:var(--bg3);border:0.5px solid var(--bg3);border-radius:8px;padding:8px 14px;color:var(--text2);font-size:12px;cursor:pointer;" onclick="copySubCardNumber()">📋 Скопировать номер</button>
-    </div>
-    <button class="sub-pay-btn" id="sub-pay-btn" onclick="contactManagerForSub()">💬 Написать менеджеру и отправить чек</button>
-    <div class="sub-note">После перевода напиши менеджеру и пришли чек.<br>Доступ откроют вручную в течение часа.</div>
+    <button class="sub-pay-btn" id="sub-pay-btn" onclick="startRoulettePayment()">⭐ Оплатить через Telegram Stars</button>
+    <div class="sub-note">После оплаты доступ активируется мгновенно.<br>Вопросы? Пиши <a href="https://t.me/games_lis_bot" style="color:var(--gold);">в поддержку</a>.<br>Оплачивая, ты соглашаешься с <span class="cp-legal-link" onclick="cpOpenLegal('offer')">офертой</span> и <span class="cp-legal-link" onclick="cpOpenLegal('privacy')">политикой конфиденциальности</span>.</div>
   </div>
 
   <nav class="bottomnav">
@@ -613,6 +614,7 @@ window.addEventListener('load',function(){
   var u=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||null;
   myTgId=u?String(u.id):('test_'+Math.floor(Math.random()*100000));
   myTgName=u?((u.first_name||'')+' '+(u.last_name||'')).trim():'';
+  if(window.initCopyProtection)window.initCopyProtection(myTgId);
 
   firebaseAuth(function(){
     document.getElementById('splash').style.display='none';
@@ -808,6 +810,7 @@ mean_b:{t:'Выйти с автопилота',e:'🧭',sub:'Осознание,
 
 // === CHECKUP STATE ===
 var ckType=0,ckStep=0,ckScores=[0,0,0,0,0,0],ckSel=null,ckSelSphere=null,ckTimer=null,ckTarotIdx=0,ckGivenCL=[];
+var ckCurrentKey=null,ckSaveTimer=null,ckSessionSaveTimer=null;
 
 function ckShowView(id){
   document.querySelectorAll('#s-checkup .ck-view').forEach(function(v){v.classList.remove('active');});
@@ -816,8 +819,43 @@ function ckShowView(id){
 
 function renderCheckupBadge(){renderCheckupTab();}
 
+var ckResumeData=null;
+
+function ckSaveSession(){
+  if(!fbDb||!myTgId)return;
+  clearTimeout(ckSessionSaveTimer);
+  ckSessionSaveTimer=setTimeout(function(){
+    fbDb.collection('roulette_checkup_session').doc(myTgId).set({
+      ckType:ckType,ckStep:ckStep,ckScores:ckScores,updatedAt:Date.now()
+    }).catch(function(){});
+  },300);
+}
+function ckClearSession(){
+  if(!fbDb||!myTgId)return;
+  fbDb.collection('roulette_checkup_session').doc(myTgId).delete().catch(function(){});
+  ckResumeData=null;
+}
+function ckLoadSession(cb){
+  if(!fbDb||!myTgId){cb(null);return;}
+  fbDb.collection('roulette_checkup_session').doc(myTgId).get().then(function(doc){
+    cb((doc.exists&&doc.data())||null);
+  }).catch(function(){cb(null);});
+}
+
 function renderCheckupTab(){
   var tickets=userState.checkupTickets||0;
+  ckLoadSession(function(data){
+    ckResumeData=data;
+    var rb=document.getElementById('ck-resume-banner');
+    if(rb){
+      if(data&&tickets>0){
+        rb.style.display='block';
+        rb.querySelector('.ck-resume-txt').textContent='У тебя есть незавершённый чекап (вопрос '+(data.ckStep+1)+')';
+      } else {
+        rb.style.display='none';
+      }
+    }
+  });
   // ticket banner
   var banner=document.getElementById('ck-ticket-banner');
   var noMsg=document.getElementById('ck-no-ticket-msg');
@@ -837,7 +875,8 @@ function renderCheckupTab(){
   if(!fbDb)return;
   fbDb.collection('roulette_checklists').doc(myTgId).get().then(function(doc){
     var data=(doc.exists&&doc.data())||{};
-    var lists=data.lists||[];
+    var listsRaw=data.lists||{};
+    var lists=Array.isArray(listsRaw)?listsRaw:Object.keys(listsRaw).map(function(k){return listsRaw[k];});
     var inprog=[],avail=[],done=[];
     lists.forEach(function(l){
       var pct=l.total>0?Math.round(l.done/l.total*100):0;
@@ -882,6 +921,7 @@ function renderCkSection(secId,listId,items,type){
 
 function ckOpenSaved(key){
   var cl=CL_DATA[key];if(!cl)return;
+  ckCurrentKey=key;
   ckShowView('ck-checklist');
   document.getElementById('clE').textContent=cl.e;
   document.getElementById('clT').textContent=cl.t;
@@ -891,22 +931,58 @@ function ckOpenSaved(key){
   cl.sec.forEach(function(s){
     h+='<div class="cl-sec"><h3>'+s.h+'</h3>';
     s.items.forEach(function(it){
-      h+='<div class="cl-it"><div class="cl-chk" onclick="ckToggle(this)"></div><div><div class="cl-it-t">'+it.t+'</div><div class="cl-it-d">'+it.d+'</div></div></div>';
+      h+='<div class="cl-it"><div class="cl-chk" onclick="ckToggle(this)" data-i="'+total+'"></div><div><div class="cl-it-t">'+it.t+'</div><div class="cl-it-d">'+it.d+'</div></div></div>';
       total++;
     });h+='</div>';
   });
   document.getElementById('clBody').innerHTML=h;
   document.getElementById('clBody').dataset.total=total;
+  document.getElementById('clBody').dataset.key=key;
+  ckLoadChecklistState(key,total);
+}
+function ckLoadChecklistState(key,total){
   document.getElementById('clProgT').textContent='0 из '+total+' выполнено';
   document.getElementById('clProgF').style.width='0%';
   document.getElementById('clSales50').style.display='none';
   document.getElementById('clSales100').style.display='none';
+  if(!fbDb||!myTgId)return;
+  fbDb.collection('roulette_checklists').doc(myTgId).get().then(function(doc){
+    var data=(doc.exists&&doc.data())||{};
+    var lists=data.lists||{};
+    var saved=Array.isArray(lists)?(lists.find(function(l){return l.key===key;})||null):(lists[key]||null);
+    if(!saved||!saved.items)return;
+    var b=document.getElementById('clBody');
+    if(b.dataset.key!==key)return;
+    saved.items.forEach(function(checked,i){
+      if(!checked)return;
+      var chk=b.querySelector('.cl-chk[data-i="'+i+'"]');
+      if(chk)chk.classList.add('done');
+    });
+    var done=b.querySelectorAll('.cl-chk.done').length;
+    var pct=Math.round(done/total*100);
+    document.getElementById('clProgT').textContent=done+' из '+total+' выполнено';
+    document.getElementById('clProgF').style.width=pct+'%';
+    document.getElementById('clSales50').style.display=(pct>=50&&pct<100)?'block':'none';
+    document.getElementById('clSales100').style.display=pct>=100?'block':'none';
+  }).catch(function(){});
 }
 
 function ckStart(){
   if(userState.checkupTickets<=0){showToast('Нет билетов');return;}
+  if(ckResumeData){ckResume();return;}
+  ckStartFresh();
+}
+function ckStartFresh(){
+  if(userState.checkupTickets<=0){showToast('Нет билетов');return;}
+  ckClearSession();
   ckType=Math.floor(Math.random()*5);
   ckStep=0;ckScores=[0,0,0,0,0,0];ckSel=null;
+  if(ckType===2){ckInitTarot();ckShowView('ck-tarot');}
+  else{ckShowView('ck-play');ckRender();ckSaveSession();}
+}
+function ckResume(){
+  if(!ckResumeData)return;
+  ckType=ckResumeData.ckType;ckStep=ckResumeData.ckStep;ckScores=ckResumeData.ckScores||[0,0,0,0,0,0];ckSel=null;
   if(ckType===2){ckInitTarot();ckShowView('ck-tarot');}
   else{ckShowView('ck-play');ckRender();}
 }
@@ -959,7 +1035,7 @@ function ckSelCh(v,s){
   var cards=document.querySelectorAll('.ck-ch');cards[v===1?0:1].classList.add('sel');
   ckSel={s:s,v:v};
   setTimeout(function(){ckScores[ckSel.s]+=ckSel.v;ckStep++;
-    if(ckStep<ckMaxSteps())ckRender();else ckFinish();
+    if(ckStep<ckMaxSteps()){ckRender();ckSaveSession();}else ckFinish();
   },400);
 }
 
@@ -1026,10 +1102,11 @@ function ckSelCmp(v,s){
 // === NEXT / FINISH ===
 function ckNextStep(){
   if(!ckSel)return;ckScores[ckSel.s]+=ckSel.v;ckStep++;
-  if(ckStep<ckMaxSteps())ckRender();else ckFinish();
+  if(ckStep<ckMaxSteps()){ckRender();ckSaveSession();}else ckFinish();
 }
 function ckFinish(){
   clearInterval(ckTimer);ckShowView('ck-loading');
+  ckClearSession();
   setTimeout(ckShowResults,2500);
 }
 
@@ -1067,6 +1144,7 @@ function ckShowChecklist(si){
   var keys=CL_MAP[si];
   var key=keys.find(function(k){return ckGivenCL.indexOf(k)===-1;})||keys[0];
   ckGivenCL.push(key);
+  ckCurrentKey=key;
   var cl=CL_DATA[key];
   document.getElementById('clE').textContent=cl.e;
   document.getElementById('clT').textContent=cl.t;
@@ -1082,21 +1160,33 @@ function ckShowChecklist(si){
   });
   document.getElementById('clBody').innerHTML=h;
   document.getElementById('clBody').dataset.total=total;
-  document.getElementById('clBody').dataset.done=0;
-  document.getElementById('clProgT').textContent='0 из '+total+' выполнено';
-  document.getElementById('clProgF').style.width='0%';
-  document.getElementById('clSales50').style.display='none';
-  document.getElementById('clSales100').style.display='none';
+  document.getElementById('clBody').dataset.key=key;
+  ckSaveChecklist(key,cl.t,total,0,new Array(total).fill(false));
+  ckLoadChecklistState(key,total);
 }
 function ckToggle(el){
   el.classList.toggle('done');
-  var b=document.getElementById('clBody'),tot=parseInt(b.dataset.total);
+  var b=document.getElementById('clBody'),tot=parseInt(b.dataset.total),key=b.dataset.key||ckCurrentKey;
   var done=b.querySelectorAll('.cl-chk.done').length;
   var pct=Math.round(done/tot*100);
   document.getElementById('clProgT').textContent=done+' из '+tot+' выполнено';
   document.getElementById('clProgF').style.width=pct+'%';
   document.getElementById('clSales50').style.display=(pct>=50&&pct<100)?'block':'none';
   document.getElementById('clSales100').style.display=pct>=100?'block':'none';
+  if(!key)return;
+  var items=[];
+  b.querySelectorAll('.cl-chk').forEach(function(c){items.push(c.classList.contains('done'));});
+  var cl=CL_DATA[key];
+  ckSaveChecklist(key,cl?cl.t:key,tot,done,items);
+}
+function ckSaveChecklist(key,title,total,done,items){
+  if(!fbDb||!myTgId)return;
+  clearTimeout(ckSaveTimer);
+  ckSaveTimer=setTimeout(function(){
+    var upd={};
+    upd['lists.'+key]={key:key,title:title,total:total,done:done,items:items,updatedAt:Date.now()};
+    fbDb.collection('roulette_checklists').doc(myTgId).set(upd,{merge:true}).catch(function(){});
+  },300);
 }
 function ckOpenSub(){
   // Открываем экран подписки (без навбара — overlay поверх)
@@ -1123,26 +1213,29 @@ function openSubScreen() {
   trackEvent('sub_screen_open', {});
 }
 
-var SUB_PLAN_LABELS = {'1m':'1 месяц','3m':'3 месяца','6m':'6 месяцев','12m':'12 месяцев'};
-var SUB_PLAN_PRICES_RUB = {'1m':'5 000 ₽','3m':'14 000 ₽','6m':'27 000 ₽','12m':'49 000 ₽'};
-
-function copySubCardNumber() {
-  var cardText = document.getElementById('sub-card-number').textContent.replace(/\s/g,'');
-  if(navigator.clipboard) {
-    navigator.clipboard.writeText(cardText).then(function(){ showToast('Номер карты скопирован'); }).catch(function(){ showToast('Не удалось скопировать'); });
-  } else {
-    showToast('Скопируй номер вручную');
-  }
-}
-
-function contactManagerForSub() {
+function startRoulettePayment() {
   var tg = window.Telegram && window.Telegram.WebApp;
   if(!tg) { showToast('Только в Telegram'); return; }
-  var planLabel = SUB_PLAN_LABELS[selectedPlan] || selectedPlan;
-  var priceLabel = SUB_PLAN_PRICES_RUB[selectedPlan] || '';
-  trackEvent('payment_manager_contact', {plan: selectedPlan});
-  var text = encodeURIComponent('Здравствуй! Хочу оформить подписку ManClub на ' + planLabel + ' (' + priceLabel + '). Перевёл на карту, чек прикладываю.');
-  tg.openTelegramLink('https://t.me/job_bylobychevinsibir?text=' + text);
+  var chatId = myTgId;
+  if(!chatId) { showToast('Нет данных пользователя'); return; }
+  var btn = document.getElementById('sub-pay-btn');
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ Создаём счёт...'; }
+  fetch('https://llobychev-manproduction-networking-server-6f2d.twc1.net/create-invoice', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ chat_id: chatId, plan: selectedPlan, bot: 'main' })
+  }).then(function(r){ return r.json(); }).then(function(data){
+    if(btn) { btn.disabled = false; btn.innerHTML = '⭐ Оплатить через Telegram Stars'; }
+    if(data.ok) {
+      showToast('Счёт отправлен в чат с ботом');
+      trackEvent('payment_initiated', {plan: selectedPlan, bot: 'main'});
+    } else {
+      showToast('Ошибка: ' + (data.error || 'попробуй снова'));
+    }
+  }).catch(function(){
+    if(btn) { btn.disabled = false; btn.innerHTML = '⭐ Оплатить через Telegram Stars'; }
+    showToast('Нет соединения с сервером');
+  });
 }
 function ckDlPdf(){showToast('Генерация PDF...');}
 function ckDlImg(){showToast('Генерация картинки...');}
@@ -1455,5 +1548,158 @@ document.addEventListener('focusin',function(e){
   }
 });
 </script>
+
+<!-- ===== ЗАЩИТА ОТ КОПИРОВАНИЯ ===== -->
+<style>
+*{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;}
+img,svg{-webkit-user-drag:none;user-drag:none;}
+#cp-watermark{position:fixed;inset:0;pointer-events:none;z-index:99998;overflow:hidden;opacity:0.05;display:flex;flex-wrap:wrap;align-content:flex-start;transform:rotate(-28deg) scale(1.4);transform-origin:center center;}
+#cp-watermark span{font-size:11px;font-weight:600;color:#fff;white-space:nowrap;margin:22px;letter-spacing:0.5px;}
+body.cp-blur #root{filter:blur(22px);}
+#root{transition:filter .15s ease;}
+</style>
+<div id="cp-watermark"></div>
+<script>
+(function(){
+  function initCopyProtection(uid){
+    // watermark
+    var wm=document.getElementById('cp-watermark');
+    if(wm){
+      var d=new Date();
+      var label='MANCLUB · '+(uid||'guest')+' · '+d.toLocaleDateString('ru-RU');
+      var html='';
+      for(var i=0;i<60;i++)html+='<span>'+label+'</span>';
+      wm.innerHTML=html;
+    }
+    // block context menu (save image / inspect via long press menu on desktop)
+    document.addEventListener('contextmenu',function(e){e.preventDefault();},false);
+    // block text selection start as a fallback to CSS
+    document.addEventListener('selectstart',function(e){
+      var t=e.target;
+      if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+      e.preventDefault();
+    },false);
+    // block dragging images out of the app
+    document.addEventListener('dragstart',function(e){e.preventDefault();},false);
+    // blur content when app loses focus / goes to background (app switcher screenshots, screen recording overlays)
+    document.addEventListener('visibilitychange',function(){
+      document.body.classList.toggle('cp-blur',document.hidden);
+    },false);
+    window.addEventListener('blur',function(){document.body.classList.add('cp-blur');},false);
+    window.addEventListener('focus',function(){document.body.classList.remove('cp-blur');},false);
+  }
+  window.initCopyProtection=initCopyProtection;
+})();
+</script>
+<!-- ===== /ЗАЩИТА ОТ КОПИРОВАНИЯ ===== -->
+
+
+<!-- ===== ЮРИДИЧЕСКИЕ ДОКУМЕНТЫ ===== -->
+<style>
+#cp-legal-overlay{position:fixed;inset:0;background:rgba(8,12,20,0.92);z-index:100000;display:none;flex-direction:column;backdrop-filter:blur(4px);}
+#cp-legal-overlay.active{display:flex;}
+.cp-legal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px;flex-shrink:0;}
+.cp-legal-title{font-size:15px;font-weight:600;color:var(--text,#fff);}
+.cp-legal-close{background:var(--bg3,#222);border:0.5px solid var(--border,#333);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--text2,#aaa);cursor:pointer;font-size:14px;}
+.cp-legal-tabs{display:flex;gap:8px;padding:0 16px 12px;flex-shrink:0;}
+.cp-legal-tab{flex:1;text-align:center;padding:9px 6px;border-radius:8px;background:var(--bg3,#222);border:0.5px solid var(--border,#333);color:var(--text2,#aaa);font-size:12px;cursor:pointer;}
+.cp-legal-tab.active{background:var(--accent,#C9A84C);color:#15110a;font-weight:600;border-color:transparent;}
+.cp-legal-body{flex:1;overflow-y:auto;padding:4px 16px 28px;font-size:12.5px;line-height:1.6;color:var(--text2,#ccc);-webkit-user-select:text;user-select:text;}
+.cp-legal-body h3{font-size:13.5px;color:var(--text,#fff);margin:16px 0 6px;}
+.cp-legal-body h3:first-child{margin-top:4px;}
+.cp-legal-body p{margin:0 0 8px;}
+.cp-legal-doc{display:none;}
+.cp-legal-doc.active{display:block;}
+.cp-legal-link{color:var(--accent,#C9A84C);text-decoration:underline;cursor:pointer;font-size:11px;}
+</style>
+
+<div id="cp-legal-overlay">
+  <div class="cp-legal-head">
+    <div class="cp-legal-title">Документы</div>
+    <div class="cp-legal-close" onclick="document.getElementById('cp-legal-overlay').classList.remove('active')">✕</div>
+  </div>
+  <div class="cp-legal-tabs">
+    <div class="cp-legal-tab active" id="cp-tab-offer" onclick="cpShowLegal('offer')">Оферта</div>
+    <div class="cp-legal-tab" id="cp-tab-privacy" onclick="cpShowLegal('privacy')">Конфиденциальность</div>
+    <div class="cp-legal-tab" id="cp-tab-consent" onclick="cpShowLegal('consent')">Согласие на ПД</div>
+  </div>
+  <div class="cp-legal-body">
+
+    <div class="cp-legal-doc active" id="cp-doc-offer">
+      <h3>Публичная оферта на оказание услуг ManClub in Siberia</h3>
+      <p>Настоящий документ является публичной офертой (предложением) физического лица — организатора проекта ManClub in Siberia (далее «Исполнитель»), адресованной любому заинтересованному лицу (далее «Пользователь»), о заключении договора на изложенных ниже условиях.</p>
+      <h3>1. Предмет договора</h3>
+      <p>Исполнитель предоставляет Пользователю доступ к цифровому продукту — мини-приложению в Telegram, включающему диагностические инструменты, образовательные материалы, чек-листы и сообщество (далее «Сервис»), на условиях платной подписки или демо-доступа.</p>
+      <h3>2. Порядок оформления и оплаты</h3>
+      <p>Оплата производится через Telegram Stars или банковским переводом по реквизитам, указанным в Сервисе. Доступ открывается после подтверждения оплаты Исполнителем, в течение времени, указанного в интерфейсе Сервиса.</p>
+      <h3>3. Демо-доступ</h3>
+      <p>Пользователю может предоставляться временный демо-доступ к ограниченному функционалу Сервиса. По истечении срока демо-доступа функционал блокируется до оформления платной подписки.</p>
+      <h3>4. Срок действия подписки</h3>
+      <p>Подписка предоставляется на срок, выбранный Пользователем при оплате (1, 3, 6 или 12 месяцев), и не продлевается автоматически.</p>
+      <h3>5. Возврат средств</h3>
+      <p>Возврат денежных средств возможен в течение 24 часов с момента оплаты при условии, что Пользователь не воспользовался платным функционалом Сервиса. Для оформления возврата необходимо обратиться к Исполнителю.</p>
+      <h3>6. Ограничение ответственности</h3>
+      <p>Сервис не является медицинской, психологической или юридической консультацией. Все материалы носят информационно-образовательный характер. Исполнитель не несёт ответственности за решения, принятые Пользователем на основе материалов Сервиса.</p>
+      <h3>7. Интеллектуальная собственность</h3>
+      <p>Все материалы Сервиса (тексты, чек-листы, видео, дизайн) являются объектами авторского права Исполнителя. Копирование, распространение и публикация материалов без письменного согласия Исполнителя запрещены.</p>
+      <h3>8. Контакты</h3>
+      <p>По всем вопросам, связанным с настоящей офертой, Пользователь может обратиться к Исполнителю через Telegram-бота Сервиса.</p>
+      <p style="color:var(--text3,#777);font-size:11px;margin-top:14px;">Документ опубликован в информационных целях. Перед публичным запуском требуется проверка юристом на соответствие законодательству РФ.</p>
+    </div>
+
+    <div class="cp-legal-doc" id="cp-doc-privacy">
+      <h3>Политика конфиденциальности</h3>
+      <p>Настоящая Политика определяет порядок обработки персональных данных Пользователей мини-приложения ManClub in Siberia (далее «Сервис»).</p>
+      <h3>1. Какие данные собираются</h3>
+      <p>Имя, фамилия, username и идентификатор Telegram, данные о прохождении диагностики и чек-листов, история активности в Сервисе, данные об оплате (без хранения реквизитов карт).</p>
+      <h3>2. Цели обработки</h3>
+      <p>Предоставление доступа к функционалу Сервиса, персонализация контента, начисление бонусов и промокодов, связь с Пользователем по вопросам подписки.</p>
+      <h3>3. Хранение данных</h3>
+      <p>Данные хранятся в облачной базе данных Firebase Firestore. Доступ к данным имеет только Исполнитель.</p>
+      <h3>4. Передача третьим лицам</h3>
+      <p>Данные не передаются третьим лицам, за исключением случаев, предусмотренных законодательством РФ, либо технических партнёров (Telegram, Firebase), необходимых для работы Сервиса.</p>
+      <h3>5. Права пользователя</h3>
+      <p>Пользователь вправе запросить выгрузку своих данных или их удаление, обратившись к Исполнителю через Telegram-бота. Выгрузка данных также доступна в разделе «Выгрузить мои данные» в профиле.</p>
+      <h3>6. Срок хранения</h3>
+      <p>Данные хранятся в течение всего срока использования Сервиса Пользователем и удаляются по запросу либо в течение 12 месяцев после прекращения использования.</p>
+      <p style="color:var(--text3,#777);font-size:11px;margin-top:14px;">Документ опубликован в информационных целях. Перед публичным запуском требуется проверка юристом на соответствие 152-ФЗ.</p>
+    </div>
+
+    <div class="cp-legal-doc" id="cp-doc-consent">
+      <h3>Согласие на обработку персональных данных</h3>
+      <p>Используя Сервис, Пользователь даёт согласие Исполнителю на обработку следующих персональных данных: имя, фамилия, username и идентификатор Telegram, результаты диагностики, данные об активности в Сервисе.</p>
+      <h3>Цель обработки</h3>
+      <p>Обеспечение работы функционала Сервиса, персонализация контента, информирование о статусе подписки и акциях.</p>
+      <h3>Способы обработки</h3>
+      <p>Автоматизированная обработка с использованием средств вычислительной техники, без передачи данных третьим лицам за пределы целей, указанных в Политике конфиденциальности.</p>
+      <h3>Срок действия согласия</h3>
+      <p>Согласие действует с момента начала использования Сервиса до момента его отзыва Пользователем путём обращения к Исполнителю.</p>
+      <h3>Отзыв согласия</h3>
+      <p>Пользователь может отозвать согласие в любой момент, обратившись через Telegram-бота Сервиса. Отзыв согласия влечёт прекращение доступа к Сервису.</p>
+      <p style="color:var(--text3,#777);font-size:11px;margin-top:14px;">Документ опубликован в информационных целях. Перед публичным запуском требуется проверка юристом на соответствие 152-ФЗ.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function cpOpenLegal(doc){
+  document.getElementById('cp-legal-overlay').classList.add('active');
+  cpShowLegal(doc||'offer');
+}
+function cpShowLegal(doc){
+  document.querySelectorAll('.cp-legal-tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.cp-legal-doc').forEach(function(d){d.classList.remove('active');});
+  var tab=document.getElementById('cp-tab-'+doc);
+  var body=document.getElementById('cp-doc-'+doc);
+  if(tab)tab.classList.add('active');
+  if(body)body.classList.add('active');
+  var bodyWrap=document.querySelector('.cp-legal-body');
+  if(bodyWrap)bodyWrap.scrollTop=0;
+}
+</script>
+<!-- ===== /ЮРИДИЧЕСКИЕ ДОКУМЕНТЫ ===== -->
+
 </body>
 </html>
