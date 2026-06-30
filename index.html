@@ -47,6 +47,17 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 /* RESULT MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(10,3,20,0.85);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
 .modal-overlay.active{display:flex;}
+.sub-pay-alt{width:calc(100% - 32px);margin:10px 16px 0;padding:13px;border-radius:12px;background:transparent;border:1px solid var(--border,#333);color:var(--text2,#ccc);font-size:14px;font-weight:600;cursor:pointer;}
+.sub-pay-alt:active{opacity:0.7;}
+.transfer-box{background:var(--bg2,#1a1a1a);border-radius:18px;padding:24px 20px;max-width:340px;width:100%;text-align:left;}
+.transfer-box h3{margin:0 0 12px;font-size:16px;color:var(--text,#fff);text-align:center;}
+.transfer-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border,#333);font-size:13px;}
+.transfer-row:last-of-type{border-bottom:none;}
+.transfer-row-label{color:var(--text3,#888);}
+.transfer-row-value{color:var(--text,#fff);font-weight:600;text-align:right;}
+.transfer-note{font-size:11.5px;color:var(--text3,#888);line-height:1.5;margin:14px 0 18px;}
+.transfer-close{width:100%;padding:13px;border-radius:12px;background:var(--accent,#C9A84C);color:#15110a;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+
 .result-box{width:100%;max-width:340px;background:var(--bg2);border-radius:16px;padding:32px 26px;text-align:center;border:0.5px solid var(--border);}
 .result-icon{font-size:54px;margin-bottom:16px;}
 .result-title{font-size:19px;font-weight:500;color:var(--text);margin-bottom:8px;}
@@ -433,6 +444,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
       </div>
     </div>
     <button class="sub-pay-btn" id="sub-pay-btn" onclick="startRoulettePayment()">⭐ Оплатить через Telegram Stars</button>
+    <button class="sub-pay-alt" id="sub-pay-alt-btn" onclick="openTransferModal()">💳 Оплата переводом</button>
     <div class="sub-note">После оплаты доступ активируется мгновенно.<br>Вопросы? Пиши <a href="https://t.me/games_lis_bot" style="color:var(--gold);">в поддержку</a>.<br>Оплачивая, ты соглашаешься с <span class="cp-legal-link" onclick="cpOpenLegal('offer')">офертой</span> и <span class="cp-legal-link" onclick="cpOpenLegal('privacy')">политикой конфиденциальности</span>.</div>
   </div>
 
@@ -452,6 +464,19 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
     <div class="result-title" id="result-title">Поздравляем!</div>
     <div class="result-desc" id="result-desc"></div>
     <button class="result-close" id="result-close" onclick="closeResultModal()">Отлично!</button>
+  </div>
+</div>
+
+<!-- TRANSFER PAYMENT MODAL -->
+<div class="modal-overlay" id="transfer-modal">
+  <div class="transfer-box">
+    <h3>Оплата переводом</h3>
+    <div class="transfer-row"><span class="transfer-row-label">Тариф</span><span class="transfer-row-value" id="transfer-plan-name">—</span></div>
+    <div class="transfer-row"><span class="transfer-row-label">Сумма</span><span class="transfer-row-value" id="transfer-plan-price">—</span></div>
+    <div class="transfer-row"><span class="transfer-row-label">Карта (Газпромбанк)</span><span class="transfer-row-value">2200 0117 9022 3078</span></div>
+    <div class="transfer-row"><span class="transfer-row-label">Получатель</span><span class="transfer-row-value">Оксана Л.</span></div>
+    <div class="transfer-note">Переведи сумму по указанным реквизитам и пришли скриншот чека менеджеру <a href="https://t.me/job_bylobychevinsibir" style="color:var(--gold);">@job_bylobychevinsibir</a>. Доступ откроем вручную после подтверждения оплаты, обычно в течение нескольких часов.</div>
+    <button class="transfer-close" onclick="closeTransferModal()">Понятно</button>
   </div>
 </div>
 
@@ -1200,6 +1225,24 @@ function selectPlan(plan) {
   document.querySelectorAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
   var el = document.getElementById('plan-' + plan);
   if(el) el.classList.add('selected');
+}
+
+var PLAN_INFO = {
+  '1m':  {name: '1 месяц',    price: '5 000 ₽'},
+  '3m':  {name: '3 месяца',   price: '14 000 ₽'},
+  '6m':  {name: '6 месяцев',  price: '27 000 ₽'},
+  '12m': {name: '12 месяцев', price: '49 000 ₽'}
+};
+
+function openTransferModal() {
+  var info = PLAN_INFO[selectedPlan] || PLAN_INFO['1m'];
+  document.getElementById('transfer-plan-name').textContent = info.name;
+  document.getElementById('transfer-plan-price').textContent = info.price;
+  document.getElementById('transfer-modal').classList.add('active');
+  trackEvent('transfer_modal_open', {plan: selectedPlan});
+}
+function closeTransferModal() {
+  document.getElementById('transfer-modal').classList.remove('active');
 }
 
 function openSubScreen() {
