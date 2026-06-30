@@ -1916,6 +1916,19 @@ function lvLoadKnowledge(cb){
     }else{
       lvKnowledge=[];
       snap.forEach(function(doc){lvKnowledge.push(doc.data());});
+      // Автодосев: если в коде появился новый intent, которого ещё нет в Firestore,
+      // дописываем только его, не трогая то, что уже отредактировано вручную.
+      var existingIds=lvKnowledge.map(function(i){return i.intentId;});
+      var missing=LV_KNOWLEDGE_SEED.filter(function(item){return existingIds.indexOf(item.intentId)===-1;});
+      if(missing.length){
+        var addBatch=fbDb.batch();
+        missing.forEach(function(item){
+          var ref=fbDb.collection('lyova_knowledge').doc(item.intentId);
+          addBatch.set(ref,item);
+          lvKnowledge.push(item);
+        });
+        addBatch.commit().catch(function(e){console.warn('sync new knowledge failed',e);});
+      }
     }
     cb&&cb();
   }).catch(function(e){console.warn('load knowledge failed',e);lvKnowledge=LV_KNOWLEDGE_SEED;cb&&cb();});
