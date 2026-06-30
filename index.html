@@ -392,6 +392,14 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
   <div class="app-screen" id="s-gifts" style="flex:1;display:none;flex-direction:column;overflow-y:auto;">
     <div class="topbar"><div><div class="topbar-logo">🎁 Подарки</div><div class="topbar-sub">Все призы</div></div></div>
     <div class="content">
+      <div id="gifts-stickers-card" class="prize-card" style="margin-bottom:14px;border:1px solid rgba(201,168,76,0.35);">
+        <div class="prize-emoji">🦁</div>
+        <div class="prize-info">
+          <div class="prize-title">Стикеры Лёвы</div>
+          <div class="prize-meta" id="gifts-stickers-meta">Пак из 6 стикеров для Telegram</div>
+        </div>
+        <button class="prize-btn gold" id="gifts-stickers-btn" onclick="claimStickers('gifts_button')">Забрать</button>
+      </div>
       <div id="gifts-active-section">
         <p class="section-label">Активные</p>
         <div id="gifts-active-list"><div class="generic-stub-text" style="padding:20px 0;color:var(--text3);">Ещё нет активных призов. Крути рулетку!</div></div>
@@ -603,6 +611,34 @@ var isSpinning=false;
 var lastSpinResult=null;
 var userState={totalSpins:0,extraSpinsToday:0,lastSpinDate:'',checkupTickets:0};
 
+// ===== СТИКЕРЫ ЛЁВЫ =====
+var STICKERS_PACK_URL='https://t.me/addstickers/lyovaManClub';
+var stickersClaimed=false;
+function openStickersLink(){
+  try{
+    if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.openTelegramLink){
+      window.Telegram.WebApp.openTelegramLink(STICKERS_PACK_URL);
+    }else{
+      window.open(STICKERS_PACK_URL,'_blank');
+    }
+  }catch(e){window.open(STICKERS_PACK_URL,'_blank');}
+}
+function claimStickers(source,opts){
+  opts=opts||{};
+  if(stickersClaimed){
+    if(!opts.silent)openStickersLink();
+    return;
+  }
+  stickersClaimed=true;
+  if(fbDb&&myTgId){
+    fbDb.collection('users').doc(myTgId).set({stickersClaimed:true,stickersClaimedAt:Date.now(),stickersSource:source},{merge:true}).catch(function(){});
+  }
+  showToast('Стикеры Лёвы разблокированы 🦁 Открываю пак...');
+  setTimeout(function(){openStickersLink();},600);
+  if(typeof renderGiftsTab==='function'&&document.getElementById('s-gifts')&&document.getElementById('s-gifts').classList.contains('active'))renderGiftsTab();
+}
+// ===== КОНЕЦ СТИКЕРОВ =====
+
 function getTg(){return window.Telegram&&window.Telegram.WebApp;}
 
 
@@ -653,6 +689,7 @@ window.addEventListener('load',function(){
     fbDb.collection('users').doc(myTgId).get().then(function(doc){
       if(doc.exists){
         myUser=doc.data();
+        if(myUser&&myUser.stickersClaimed)stickersClaimed=true;
         launchApp();
       } else {
         showScreen('s-register');
@@ -674,7 +711,25 @@ function submitRegistration(){
   var name=document.getElementById('reg-name').value.trim();
   if(!name){showToast('Введи имя');return;}
   trackEvent('registration',{name:name});
-  if(!fbDb){showToast('Нет подключения к базе');return;}
+  if(!fbDb){
+    if(window.firebase)initFirebase(); // на случай если firebase подгрузился, а initFirebase ещё не отработал
+    if(!fbDb){
+      showToast('Нет связи с сервером, пробую снова...');
+      var attempts=0;
+      var retryTimer=setInterval(function(){
+        attempts++;
+        if(!fbDb&&window.firebase)initFirebase();
+        if(fbDb){
+          clearInterval(retryTimer);
+          submitRegistration();
+        }else if(attempts>=10){
+          clearInterval(retryTimer);
+          showToast('Нет подключения к базе. Проверь интернет и попробуй ещё раз.');
+        }
+      },500);
+      return;
+    }
+  }
   var tgU=(getTg()&&getTg().initDataUnsafe&&getTg().initDataUnsafe.user)||{};
   var data={id:myTgId,name:name,first:name,last:'',fullName:name,initials:(name[0]||'М').toUpperCase(),tgUsername:tgU.username||name.toLowerCase(),createdAt:Date.now(),registeredAt:Date.now(),source:'sales_app'};
   // Shared user identity: write to the same top-level "users" collection used by
@@ -1198,6 +1253,7 @@ function ckToggle(el){
   document.getElementById('clProgF').style.width=pct+'%';
   document.getElementById('clSales50').style.display=(pct>=50&&pct<100)?'block':'none';
   document.getElementById('clSales100').style.display=pct>=100?'block':'none';
+  if(pct>=100&&!stickersClaimed)claimStickers('checklist');
   if(!key)return;
   var items=[];
   b.querySelectorAll('.cl-chk').forEach(function(c){items.push(c.classList.contains('done'));});
@@ -1430,6 +1486,9 @@ function applyPrizeAndRecord(prize,wasSpunToday){
     if(prize.cat==='demo'||prize.cat==='sub'){
       applyTimedPerk(prize);
     }
+    if(prize.cat==='lesson'&&!stickersClaimed){
+      claimStickers('lesson');
+    }
 
     userState.totalSpins=updates.totalSpins;
     userState.lastSpinDate=updates.lastSpinDate;
@@ -1498,6 +1557,17 @@ function showToast(msg){
 
 function renderGiftsTab(){
   if(!fbDb)return;
+  var stBtn=document.getElementById('gifts-stickers-btn');
+  var stMeta=document.getElementById('gifts-stickers-meta');
+  if(stBtn&&stMeta){
+    if(stickersClaimed){
+      stBtn.textContent='Открыть ещё раз';
+      stMeta.textContent='Уже у тебя — жми, если нужно добавить заново';
+    }else{
+      stBtn.textContent='Забрать';
+      stMeta.textContent='Пак из 6 стикеров для Telegram';
+    }
+  }
   fbDb.collection('roulette_spins').doc(myTgId).collection('history').orderBy('createdAt','desc').limit(50).get().then(function(snap){
     var active=[],used=[];
     var now=Date.now();
@@ -1824,7 +1894,8 @@ function cpShowLegal(doc){
 </div>
 
 <script>
-var LV_KNOWLEDGE_SEED=[{"intentId": "where_progress", "category": "navigation", "triggers": ["progress", "sfery", "gde rezultat", "chekap rezultaty", "сфер", "прогресс", "результат"], "answer": "Это во вкладке Чекап — там твоя карта по 5 сферам. Открыть?", "navAction": "checkup", "quickReplies": [{"label": "Открыть Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "where_lessons", "category": "navigation", "triggers": ["уроки", "видео", "обучение", "где учиться"], "answer": "Видео-уроки лежат во вкладке Уроки. Открыть?", "navAction": "lessons", "quickReplies": [{"label": "Открыть Уроки", "action": "nav:lessons"}], "priority": 10, "active": true}, {"intentId": "where_demo_timer", "category": "navigation", "triggers": ["демо", "сколько осталось", "пробный период", "когда закончится"], "answer": "Таймер демо-доступа во вкладке Демо. Открыть?", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "where_gifts", "category": "navigation", "triggers": ["подарки", "призы", "что выиграл", "мои выигрыши"], "answer": "Все твои призы из рулетки — во вкладке Подарки.", "navAction": "gifts", "quickReplies": [{"label": "Открыть Подарки", "action": "nav:gifts"}], "priority": 10, "active": true}, {"intentId": "what_is_roulette", "category": "mechanics", "triggers": ["рулетка", "крутить", "как работает рулетка", "что такое рулетка"], "answer": "Рулетка — твой ежедневный ритуал. Раз в день крутишь колесо, выпадает приз или билет. Доступно раз в 24 часа.", "navAction": null, "quickReplies": [{"label": "А что такое Чекап?", "action": "intent:what_is_checkup"}], "priority": 10, "active": true}, {"intentId": "what_is_checkup", "category": "mechanics", "triggers": ["чекап", "диагностика", "тест по сферам", "что такое чекап"], "answer": "Чекап — диагностика по 5 сферам жизни: Тело, Деньги, Люди, Голова, Смысл. Проходишь тест, узнаёшь, какая сфера слабее всего.", "navAction": "checkup", "quickReplies": [{"label": "Пройти Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "what_is_checklist", "category": "mechanics", "triggers": ["чек-лист", "чеклист", "задания", "что делать дальше"], "answer": "Чек-лист — список конкретных заданий по твоей слабой сфере. Выдаётся после прохождения Чекапа.", "navAction": null, "quickReplies": [{"label": "Пройти Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "roulette_vs_checkup", "category": "mechanics", "triggers": ["разница", "рулетка и чекап", "не понимаю систему", "это связано"], "answer": "Рулетка и Чекап — два разных контура. Рулетка крутится каждый день ради призов. Чекап проходишь отдельно, когда готов разобраться в себе — и получаешь чек-лист.", "navAction": null, "quickReplies": [], "priority": 15, "active": true}, {"intentId": "how_demo_works", "category": "mechanics", "triggers": ["как работает демо", "что после демо", "демо закончится"], "answer": "Демо — пробный доступ ко всему на ограниченное время. Когда оно закончится, оформляешь полный доступ, и всё продолжает работать без ограничений.", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "what_is_manclub", "category": "faq", "triggers": ["что такое манклаб", "что за клуб", "manclub"], "answer": "ManClub in Siberia — мужской клуб саморазвития. Работаем по 5 сферам жизни через рулетку, диагностику и чек-листы.", "navAction": null, "quickReplies": [], "priority": 10, "active": true}, {"intentId": "how_to_get_full_access", "category": "faq", "triggers": ["полный доступ", "оформить", "убрать ограничения", "купить подписку"], "answer": "Когда демо закончится, нажми «Убрать ограничения» в Демо — там варианты оформления.", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "lost_progress", "category": "faq", "triggers": ["пропал прогресс", "сбросился", "потерял данные"], "answer": "Прогресс хранится по твоему Telegram-аккаунту, не должен пропадать. Если что-то не так — напиши в поддержку клуба.", "navAction": null, "quickReplies": [], "priority": 12, "active": true}, {"intentId": "spin_not_working", "category": "faq", "triggers": ["не крутится", "кнопка не работает", "рулетка зависла", "баг"], "answer": "Если кнопка «Крутить» неактивна — скорее всего, лимит на сегодня уже использован. Проверь таймер под кнопкой.", "navAction": "roulette", "quickReplies": [{"label": "Открыть Рулетку", "action": "nav:roulette"}], "priority": 12, "active": true}, {"intentId": "fallback_no_match", "category": "support", "triggers": [], "answer": "Хм, не понял вопрос. Можешь переформулировать, или жми кнопку ниже.", "navAction": null, "quickReplies": [{"label": "Начать обучение", "action": "tutorial:start"}], "priority": 0, "active": true}];
+var LV_KNOWLEDGE_SEED=[{"intentId": "where_progress", "category": "navigation", "triggers": ["progress", "sfery", "gde rezultat", "chekap rezultaty", "сфер", "прогресс", "результат"], "answer": "Это во вкладке Чекап — там твоя карта по 5 сферам. Открыть?", "navAction": "checkup", "quickReplies": [{"label": "Открыть Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "where_lessons", "category": "navigation", "triggers": ["уроки", "видео", "обучение", "где учиться"], "answer": "Видео-уроки лежат во вкладке Уроки. Открыть?", "navAction": "lessons", "quickReplies": [{"label": "Открыть Уроки", "action": "nav:lessons"}], "priority": 10, "active": true}, {"intentId": "where_demo_timer", "category": "navigation", "triggers": ["демо", "сколько осталось", "пробный период", "когда закончится"], "answer": "Таймер демо-доступа во вкладке Демо. Открыть?", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "where_gifts", "category": "navigation", "triggers": ["подарки", "призы", "что выиграл", "мои выигрыши"], "answer": "Все твои призы из рулетки — во вкладке Подарки.", "navAction": "gifts", "quickReplies": [{"label": "Открыть Подарки", "action": "nav:gifts"}], "priority": 10, "active": true}, {"intentId": "what_is_roulette", "category": "mechanics", "triggers": ["рулетка", "крутить", "как работает рулетка", "что такое рулетка"], "answer": "Рулетка — твой ежедневный ритуал. Раз в день крутишь колесо, выпадает приз или билет. Доступно раз в 24 часа.", "navAction": null, "quickReplies": [{"label": "А что такое Чекап?", "action": "intent:what_is_checkup"}], "priority": 10, "active": true}, {"intentId": "what_is_checkup", "category": "mechanics", "triggers": ["чекап", "диагностика", "тест по сферам", "что такое чекап"], "answer": "Чекап — диагностика по 5 сферам жизни: Тело, Деньги, Люди, Голова, Смысл. Проходишь тест, узнаёшь, какая сфера слабее всего.", "navAction": "checkup", "quickReplies": [{"label": "Пройти Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "what_is_checklist", "category": "mechanics", "triggers": ["чек-лист", "чеклист", "задания", "что делать дальше"], "answer": "Чек-лист — список конкретных заданий по твоей слабой сфере. Выдаётся после прохождения Чекапа.", "navAction": null, "quickReplies": [{"label": "Пройти Чекап", "action": "nav:checkup"}], "priority": 10, "active": true}, {"intentId": "roulette_vs_checkup", "category": "mechanics", "triggers": ["разница", "рулетка и чекап", "не понимаю систему", "это связано"], "answer": "Рулетка и Чекап — два разных контура. Рулетка крутится каждый день ради призов. Чекап проходишь отдельно, когда готов разобраться в себе — и получаешь чек-лист.", "navAction": null, "quickReplies": [], "priority": 15, "active": true}, {"intentId": "how_demo_works", "category": "mechanics", "triggers": ["как работает демо", "что после демо", "демо закончится"], "answer": "Демо — пробный доступ ко всему на ограниченное время. Когда оно закончится, оформляешь полный доступ, и всё продолжает работать без ограничений.", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "what_is_manclub", "category": "faq", "triggers": ["что такое манклаб", "что за клуб", "manclub"], "answer": "ManClub in Siberia — мужской клуб саморазвития. Работаем по 5 сферам жизни через рулетку, диагностику и чек-листы.", "navAction": null, "quickReplies": [], "priority": 10, "active": true}, {"intentId": "how_to_get_full_access", "category": "faq", "triggers": ["полный доступ", "оформить", "убрать ограничения", "купить подписку"], "answer": "Когда демо закончится, нажми «Убрать ограничения» в Демо — там варианты оформления.", "navAction": "demo", "quickReplies": [{"label": "Открыть Демо", "action": "nav:demo"}], "priority": 10, "active": true}, {"intentId": "lost_progress", "category": "faq", "triggers": ["пропал прогресс", "сбросился", "потерял данные"], "answer": "Прогресс хранится по твоему Telegram-аккаунту, не должен пропадать. Если что-то не так — напиши в поддержку клуба.", "navAction": null, "quickReplies": [], "priority": 12, "active": true}, {"intentId": "spin_not_working", "category": "faq", "triggers": ["не крутится", "кнопка не работает", "рулетка зависла", "баг"], "answer": "Если кнопка «Крутить» неактивна — скорее всего, лимит на сегодня уже использован. Проверь таймер под кнопкой.", "navAction": "roulette", "quickReplies": [{"label": "Открыть Рулетку", "action": "nav:roulette"}], "priority": 12, "active": true}, {"intentId": "point_tour_menu", "category": "navigation", "triggers": ["тур по экрану", "покажи экран", "точечный тур", "обучение по экрану", "расскажи про конкретный экран", "тур"], "answer": "Погнали, по какому экрану показать?", "navAction": null, "quickReplies": [{"label": "Тур по экрану", "action": "tutorial:menu"}], "priority": 11, "active": true},
+{"intentId": "fallback_no_match", "category": "support", "triggers": [], "answer": "Хм, не понял вопрос. Можешь переформулировать, или жми кнопку ниже.", "navAction": null, "quickReplies": [{"label": "Начать обучение", "action": "tutorial:start"}], "priority": 0, "active": true}];
 var LV_TUTORIAL_SEED=[{"stepId": "step_1", "order": 1, "screen": "roulette", "targetSelector": ".wheel-stage", "title": "Ежедневная рулетка", "text": "Здарова! Это твоя ежедневная рулетка. Раз в день крутишь колесо — выпадает приз или билет.", "type": "highlight", "tab": "roulette"}, {"stepId": "step_2", "order": 2, "screen": "roulette", "targetSelector": "#spin-btn", "title": "Кнопка крутить", "text": "Жми сюда раз в 24 часа. Что выпадет — то и забираешь.", "type": "highlight", "tab": "roulette"}, {"stepId": "step_3", "order": 3, "screen": "checkup", "targetSelector": "#nav-checkup", "title": "Диагностика", "text": "Это отдельная история. Чекап — тест по 5 сферам жизни, не связан с рулеткой напрямую.", "type": "highlight", "tab": "checkup"}, {"stepId": "step_4", "order": 4, "screen": "checkup", "targetSelector": "#ckResGrid", "title": "Результаты", "text": "После теста увидишь, какая сфера слабее всего. Это точка входа для работы.", "type": "highlight", "tab": "checkup"}, {"stepId": "step_5", "order": 5, "screen": "checkup", "targetSelector": ".cl-sec", "title": "Чек-лист", "text": "По итогам Чекапа выдаётся чек-лист — конкретные задания под твою слабую сферу.", "type": "highlight", "tab": "checkup"}, {"stepId": "step_6", "order": 6, "screen": "lessons", "targetSelector": "#nav-lessons", "title": "Уроки", "text": "Видео-уроки по сферам. Можешь идти по порядку или открывать нужное под слабую сферу.", "type": "highlight", "tab": "lessons"}, {"stepId": "step_7", "order": 7, "screen": "demo", "targetSelector": ".demo-big-time", "title": "Демо-доступ", "text": "Сейчас у тебя демо-период. Здесь видно, сколько времени осталось.", "type": "highlight", "tab": "demo"}, {"stepId": "step_8", "order": 8, "screen": "demo", "targetSelector": ".demo-main-card .btn-primary", "title": "После демо", "text": "Когда демо закончится, тут оформляешь полный доступ.", "type": "highlight", "tab": "demo"}, {"stepId": "step_9", "order": 9, "screen": "gifts", "targetSelector": "#nav-gifts", "title": "Подарки", "text": "Сюда падают призы из рулетки. Заглядывай, чтобы не сгорело.", "type": "highlight", "tab": "gifts"}, {"stepId": "step_final", "order": 10, "screen": null, "targetSelector": null, "title": "Готово", "text": "Главное: рулетка — ритуал, Чекап — диагностика, чек-лист — план действий. Если запутаешься — жми на меня.", "type": "final", "tab": null}];
 var lvKnowledge=[];
 var lvTutorialSteps=[];
@@ -1939,6 +2010,16 @@ function lvHandleAction(action,label){
     lvStartTutorial();
     return;
   }
+  if(action==='tutorial:menu'){
+    lvShowScreenMenu();
+    return;
+  }
+  if(action.indexOf('tutorial:screen:')===0){
+    var scr=action.slice('tutorial:screen:'.length);
+    lvCloseChat();
+    lvStartTutorial(scr);
+    return;
+  }
 }
 
 function lvSendMessage(){
@@ -1966,7 +2047,8 @@ function lvOpenChat(){
     lvRenderActions([
       {label:'Что такое рулетка?',action:'intent:what_is_roulette'},
       {label:'Что такое Чекап?',action:'intent:what_is_checkup'},
-      {label:'Начать обучение',action:'tutorial:start'}
+      {label:'Начать обучение',action:'tutorial:start'},
+      {label:'Тур по экрану',action:'tutorial:menu'}
     ]);
   }
   if(fbDb&&myTgId){
@@ -2000,9 +2082,16 @@ function lvPositionHighlight(selector){
   tt.style.top=ttTop+'px';
 }
 
+var lvActiveSteps=[];
+var lvTutorialMode='full';
+var LV_SCREEN_LABELS={roulette:'Рулетка',checkup:'Чекап',lessons:'Уроки',demo:'Демо',gifts:'Подарки'};
+
 function lvShowTutorialStep(i){
-  if(i>=lvTutorialSteps.length){lvFinishTutorial();return;}
-  var step=lvTutorialSteps[i];
+  if(i>=lvActiveSteps.length){
+    if(lvTutorialMode==='point'){lvFinishPointTour();}else{lvFinishTutorial();}
+    return;
+  }
+  var step=lvActiveSteps[i];
   lvTutorialIndex=i;
   if(step.type==='final'){
     document.getElementById('lvTt').classList.remove('active');
@@ -2018,7 +2107,7 @@ function lvShowTutorialStep(i){
     lvPositionHighlight(step.targetSelector);
     document.getElementById('lvTtTitle').textContent=step.title;
     document.getElementById('lvTtText').textContent=step.text;
-    document.getElementById('lvTtProgress').textContent=(i+1)+' iz '+lvTutorialSteps.length;
+    document.getElementById('lvTtProgress').textContent=(i+1)+' iz '+lvActiveSteps.length;
     document.getElementById('lvTt').classList.add('active');
     document.getElementById('lvSkip').classList.add('active');
   },250);
@@ -2026,29 +2115,52 @@ function lvShowTutorialStep(i){
 
 function lvNextTutorialStep(){lvShowTutorialStep(lvTutorialIndex+1);}
 
-function lvStartTutorial(){
+function lvStartTutorial(screen){
+  lvTutorialMode=screen?'point':'full';
+  lvActiveSteps=screen?lvTutorialSteps.filter(function(s){return s.screen===screen;}):lvTutorialSteps;
   lvTutorialRunning=true;
   lvTutorialIndex=0;
   lvShowTutorialStep(0);
   if(fbDb&&myTgId){
-    fbDb.collection('tutorial_progress').doc(myTgId).set({tgId:myTgId,completed:false,lastStep:0,startedAt:firebase.firestore.FieldValue.serverTimestamp(),triggeredBy:'manual'},{merge:true}).catch(function(){});
+    fbDb.collection('tutorial_progress').doc(myTgId).set({tgId:myTgId,completed:false,lastStep:0,startedAt:firebase.firestore.FieldValue.serverTimestamp(),triggeredBy:screen?('manual_point_'+screen):'manual'},{merge:true}).catch(function(){});
   }
+}
+
+function lvShowScreenMenu(){
+  var screens=[];
+  lvTutorialSteps.forEach(function(s){if(s.screen&&screens.indexOf(s.screen)===-1)screens.push(s.screen);});
+  var qr=screens.map(function(sc){return {label:LV_SCREEN_LABELS[sc]||sc,action:'tutorial:screen:'+sc};});
+  lvRenderBubble('По какому экрану показать тур?','bot');
+  lvRenderActions(qr);
 }
 
 function lvFinishTutorial(){
   lvTutorialRunning=false;
+  document.getElementById('lvTt').classList.remove('active');
+  document.getElementById('lvHl').classList.remove('active');
+  document.getElementById('lvSkip').classList.remove('active');
+  document.getElementById('lvFinal').classList.remove('active');
   document.getElementById('lvFab').classList.remove('hidden');
   if(fbDb&&myTgId){
-    fbDb.collection('users').doc(myTgId).set({tutorialCompleted:true,tutorialLastStep:lvTutorialSteps.length},{merge:true}).catch(function(){});
-    fbDb.collection('tutorial_progress').doc(myTgId).set({completed:true,completedAt:firebase.firestore.FieldValue.serverTimestamp(),lastStep:lvTutorialSteps.length},{merge:true}).catch(function(){});
+    fbDb.collection('users').doc(myTgId).set({tutorialCompleted:true,tutorialLastStep:lvActiveSteps.length},{merge:true}).catch(function(){});
+    fbDb.collection('tutorial_progress').doc(myTgId).set({completed:true,completedAt:firebase.firestore.FieldValue.serverTimestamp(),lastStep:lvActiveSteps.length},{merge:true}).catch(function(){});
   }
+}
+
+function lvFinishPointTour(){
+  lvTutorialRunning=false;
+  document.getElementById('lvTt').classList.remove('active');
+  document.getElementById('lvHl').classList.remove('active');
+  document.getElementById('lvSkip').classList.remove('active');
+  document.getElementById('lvFab').classList.remove('hidden');
+  showToast('Готово, бро 🦁');
 }
 
 function lvSkipTutorial(){
   document.getElementById('lvTt').classList.remove('active');
   document.getElementById('lvHl').classList.remove('active');
   document.getElementById('lvSkip').classList.remove('active');
-  lvFinishTutorial();
+  if(lvTutorialMode==='point'){lvFinishPointTour();}else{lvFinishTutorial();}
 }
 
 function lvAutoCheckTutorial(){
@@ -2057,6 +2169,8 @@ function lvAutoCheckTutorial(){
     var data=doc.exists?doc.data():{};
     if(!data.tutorialCompleted){
       setTimeout(function(){
+        lvTutorialMode='full';
+        lvActiveSteps=lvTutorialSteps;
         lvTutorialRunning=true;
         lvTutorialIndex=0;
         lvShowTutorialStep(0);
@@ -2075,6 +2189,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('lvSkip').addEventListener('click',lvSkipTutorial);
   document.getElementById('lvFinalClose').addEventListener('click',function(){
     document.getElementById('lvFinal').classList.remove('active');
+    lvFinishTutorial();
   });
 });
 
