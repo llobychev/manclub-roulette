@@ -279,13 +279,6 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
     <!-- INTRO — ticket banner + checklists list -->
     <div class="ck-view active" id="ck-intro" style="padding:14px 16px 24px;">
-      <div id="ck-resume-banner" style="display:none;background:var(--bg2);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
-        <div class="ck-resume-txt" style="font-size:13px;color:var(--text);margin-bottom:8px;">У тебя есть незавершённый чекап</div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn-primary" style="flex:1;" onclick="ckResume()">Продолжить</button>
-          <button class="btn-primary" style="flex:1;background:var(--bg3);" onclick="ckStartFresh()">Начать заново</button>
-        </div>
-      </div>
       <div id="ck-ticket-banner" style="display:none;">
         <div class="ticket-wrap" id="ck-ticket-wrap"></div>
         <button class="btn-primary" id="ck-start-btn" style="display:none;margin-bottom:16px;" onclick="ckStart()">Пройти чекап →</button>
@@ -432,8 +425,14 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
         <div class="plan-card-stars">≈ 41 880 ⭐</div>
       </div>
     </div>
-    <button class="sub-pay-btn" id="sub-pay-btn" onclick="startRoulettePayment()">⭐ Оплатить через Telegram Stars</button>
-    <div class="sub-note">После оплаты доступ активируется мгновенно.<br>Вопросы? Пиши <a href="https://t.me/games_lis_bot" style="color:var(--gold);">в поддержку</a>.</div>
+    <div style="margin:0 14px 12px;background:var(--bg2);border:0.5px solid var(--bg3);border-radius:14px;padding:16px;">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Переведи на карту</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px;margin-bottom:4px;" id="sub-card-number">2200 0117 9022 3078</div>
+      <div style="font-size:12px;color:var(--text3);">Газпромбанк · Оксана Л.</div>
+      <button style="margin-top:10px;background:var(--bg3);border:0.5px solid var(--bg3);border-radius:8px;padding:8px 14px;color:var(--text2);font-size:12px;cursor:pointer;" onclick="copySubCardNumber()">📋 Скопировать номер</button>
+    </div>
+    <button class="sub-pay-btn" id="sub-pay-btn" onclick="contactManagerForSub()">💬 Написать менеджеру и отправить чек</button>
+    <div class="sub-note">После перевода напиши менеджеру и пришли чек.<br>Доступ откроют вручную в течение часа.</div>
   </div>
 
   <nav class="bottomnav">
@@ -809,7 +808,6 @@ mean_b:{t:'Выйти с автопилота',e:'🧭',sub:'Осознание,
 
 // === CHECKUP STATE ===
 var ckType=0,ckStep=0,ckScores=[0,0,0,0,0,0],ckSel=null,ckSelSphere=null,ckTimer=null,ckTarotIdx=0,ckGivenCL=[];
-var ckCurrentKey=null,ckSaveTimer=null,ckSessionSaveTimer=null;
 
 function ckShowView(id){
   document.querySelectorAll('#s-checkup .ck-view').forEach(function(v){v.classList.remove('active');});
@@ -818,43 +816,8 @@ function ckShowView(id){
 
 function renderCheckupBadge(){renderCheckupTab();}
 
-var ckResumeData=null;
-
-function ckSaveSession(){
-  if(!fbDb||!myTgId)return;
-  clearTimeout(ckSessionSaveTimer);
-  ckSessionSaveTimer=setTimeout(function(){
-    fbDb.collection('roulette_checkup_session').doc(myTgId).set({
-      ckType:ckType,ckStep:ckStep,ckScores:ckScores,updatedAt:Date.now()
-    }).catch(function(){});
-  },300);
-}
-function ckClearSession(){
-  if(!fbDb||!myTgId)return;
-  fbDb.collection('roulette_checkup_session').doc(myTgId).delete().catch(function(){});
-  ckResumeData=null;
-}
-function ckLoadSession(cb){
-  if(!fbDb||!myTgId){cb(null);return;}
-  fbDb.collection('roulette_checkup_session').doc(myTgId).get().then(function(doc){
-    cb((doc.exists&&doc.data())||null);
-  }).catch(function(){cb(null);});
-}
-
 function renderCheckupTab(){
   var tickets=userState.checkupTickets||0;
-  ckLoadSession(function(data){
-    ckResumeData=data;
-    var rb=document.getElementById('ck-resume-banner');
-    if(rb){
-      if(data&&tickets>0){
-        rb.style.display='block';
-        rb.querySelector('.ck-resume-txt').textContent='У тебя есть незавершённый чекап (вопрос '+(data.ckStep+1)+')';
-      } else {
-        rb.style.display='none';
-      }
-    }
-  });
   // ticket banner
   var banner=document.getElementById('ck-ticket-banner');
   var noMsg=document.getElementById('ck-no-ticket-msg');
@@ -874,8 +837,7 @@ function renderCheckupTab(){
   if(!fbDb)return;
   fbDb.collection('roulette_checklists').doc(myTgId).get().then(function(doc){
     var data=(doc.exists&&doc.data())||{};
-    var listsRaw=data.lists||{};
-    var lists=Array.isArray(listsRaw)?listsRaw:Object.keys(listsRaw).map(function(k){return listsRaw[k];});
+    var lists=data.lists||[];
     var inprog=[],avail=[],done=[];
     lists.forEach(function(l){
       var pct=l.total>0?Math.round(l.done/l.total*100):0;
@@ -920,7 +882,6 @@ function renderCkSection(secId,listId,items,type){
 
 function ckOpenSaved(key){
   var cl=CL_DATA[key];if(!cl)return;
-  ckCurrentKey=key;
   ckShowView('ck-checklist');
   document.getElementById('clE').textContent=cl.e;
   document.getElementById('clT').textContent=cl.t;
@@ -930,58 +891,22 @@ function ckOpenSaved(key){
   cl.sec.forEach(function(s){
     h+='<div class="cl-sec"><h3>'+s.h+'</h3>';
     s.items.forEach(function(it){
-      h+='<div class="cl-it"><div class="cl-chk" onclick="ckToggle(this)" data-i="'+total+'"></div><div><div class="cl-it-t">'+it.t+'</div><div class="cl-it-d">'+it.d+'</div></div></div>';
+      h+='<div class="cl-it"><div class="cl-chk" onclick="ckToggle(this)"></div><div><div class="cl-it-t">'+it.t+'</div><div class="cl-it-d">'+it.d+'</div></div></div>';
       total++;
     });h+='</div>';
   });
   document.getElementById('clBody').innerHTML=h;
   document.getElementById('clBody').dataset.total=total;
-  document.getElementById('clBody').dataset.key=key;
-  ckLoadChecklistState(key,total);
-}
-function ckLoadChecklistState(key,total){
   document.getElementById('clProgT').textContent='0 из '+total+' выполнено';
   document.getElementById('clProgF').style.width='0%';
   document.getElementById('clSales50').style.display='none';
   document.getElementById('clSales100').style.display='none';
-  if(!fbDb||!myTgId)return;
-  fbDb.collection('roulette_checklists').doc(myTgId).get().then(function(doc){
-    var data=(doc.exists&&doc.data())||{};
-    var lists=data.lists||{};
-    var saved=Array.isArray(lists)?(lists.find(function(l){return l.key===key;})||null):(lists[key]||null);
-    if(!saved||!saved.items)return;
-    var b=document.getElementById('clBody');
-    if(b.dataset.key!==key)return;
-    saved.items.forEach(function(checked,i){
-      if(!checked)return;
-      var chk=b.querySelector('.cl-chk[data-i="'+i+'"]');
-      if(chk)chk.classList.add('done');
-    });
-    var done=b.querySelectorAll('.cl-chk.done').length;
-    var pct=Math.round(done/total*100);
-    document.getElementById('clProgT').textContent=done+' из '+total+' выполнено';
-    document.getElementById('clProgF').style.width=pct+'%';
-    document.getElementById('clSales50').style.display=(pct>=50&&pct<100)?'block':'none';
-    document.getElementById('clSales100').style.display=pct>=100?'block':'none';
-  }).catch(function(){});
 }
 
 function ckStart(){
   if(userState.checkupTickets<=0){showToast('Нет билетов');return;}
-  if(ckResumeData){ckResume();return;}
-  ckStartFresh();
-}
-function ckStartFresh(){
-  if(userState.checkupTickets<=0){showToast('Нет билетов');return;}
-  ckClearSession();
   ckType=Math.floor(Math.random()*5);
   ckStep=0;ckScores=[0,0,0,0,0,0];ckSel=null;
-  if(ckType===2){ckInitTarot();ckShowView('ck-tarot');}
-  else{ckShowView('ck-play');ckRender();ckSaveSession();}
-}
-function ckResume(){
-  if(!ckResumeData)return;
-  ckType=ckResumeData.ckType;ckStep=ckResumeData.ckStep;ckScores=ckResumeData.ckScores||[0,0,0,0,0,0];ckSel=null;
   if(ckType===2){ckInitTarot();ckShowView('ck-tarot');}
   else{ckShowView('ck-play');ckRender();}
 }
@@ -1034,7 +959,7 @@ function ckSelCh(v,s){
   var cards=document.querySelectorAll('.ck-ch');cards[v===1?0:1].classList.add('sel');
   ckSel={s:s,v:v};
   setTimeout(function(){ckScores[ckSel.s]+=ckSel.v;ckStep++;
-    if(ckStep<ckMaxSteps()){ckRender();ckSaveSession();}else ckFinish();
+    if(ckStep<ckMaxSteps())ckRender();else ckFinish();
   },400);
 }
 
@@ -1101,11 +1026,10 @@ function ckSelCmp(v,s){
 // === NEXT / FINISH ===
 function ckNextStep(){
   if(!ckSel)return;ckScores[ckSel.s]+=ckSel.v;ckStep++;
-  if(ckStep<ckMaxSteps()){ckRender();ckSaveSession();}else ckFinish();
+  if(ckStep<ckMaxSteps())ckRender();else ckFinish();
 }
 function ckFinish(){
   clearInterval(ckTimer);ckShowView('ck-loading');
-  ckClearSession();
   setTimeout(ckShowResults,2500);
 }
 
@@ -1143,7 +1067,6 @@ function ckShowChecklist(si){
   var keys=CL_MAP[si];
   var key=keys.find(function(k){return ckGivenCL.indexOf(k)===-1;})||keys[0];
   ckGivenCL.push(key);
-  ckCurrentKey=key;
   var cl=CL_DATA[key];
   document.getElementById('clE').textContent=cl.e;
   document.getElementById('clT').textContent=cl.t;
@@ -1159,33 +1082,21 @@ function ckShowChecklist(si){
   });
   document.getElementById('clBody').innerHTML=h;
   document.getElementById('clBody').dataset.total=total;
-  document.getElementById('clBody').dataset.key=key;
-  ckSaveChecklist(key,cl.t,total,0,new Array(total).fill(false));
-  ckLoadChecklistState(key,total);
+  document.getElementById('clBody').dataset.done=0;
+  document.getElementById('clProgT').textContent='0 из '+total+' выполнено';
+  document.getElementById('clProgF').style.width='0%';
+  document.getElementById('clSales50').style.display='none';
+  document.getElementById('clSales100').style.display='none';
 }
 function ckToggle(el){
   el.classList.toggle('done');
-  var b=document.getElementById('clBody'),tot=parseInt(b.dataset.total),key=b.dataset.key||ckCurrentKey;
+  var b=document.getElementById('clBody'),tot=parseInt(b.dataset.total);
   var done=b.querySelectorAll('.cl-chk.done').length;
   var pct=Math.round(done/tot*100);
   document.getElementById('clProgT').textContent=done+' из '+tot+' выполнено';
   document.getElementById('clProgF').style.width=pct+'%';
   document.getElementById('clSales50').style.display=(pct>=50&&pct<100)?'block':'none';
   document.getElementById('clSales100').style.display=pct>=100?'block':'none';
-  if(!key)return;
-  var items=[];
-  b.querySelectorAll('.cl-chk').forEach(function(c){items.push(c.classList.contains('done'));});
-  var cl=CL_DATA[key];
-  ckSaveChecklist(key,cl?cl.t:key,tot,done,items);
-}
-function ckSaveChecklist(key,title,total,done,items){
-  if(!fbDb||!myTgId)return;
-  clearTimeout(ckSaveTimer);
-  ckSaveTimer=setTimeout(function(){
-    var upd={};
-    upd['lists.'+key]={key:key,title:title,total:total,done:done,items:items,updatedAt:Date.now()};
-    fbDb.collection('roulette_checklists').doc(myTgId).set(upd,{merge:true}).catch(function(){});
-  },300);
 }
 function ckOpenSub(){
   // Открываем экран подписки (без навбара — overlay поверх)
@@ -1212,29 +1123,26 @@ function openSubScreen() {
   trackEvent('sub_screen_open', {});
 }
 
-function startRoulettePayment() {
+var SUB_PLAN_LABELS = {'1m':'1 месяц','3m':'3 месяца','6m':'6 месяцев','12m':'12 месяцев'};
+var SUB_PLAN_PRICES_RUB = {'1m':'5 000 ₽','3m':'14 000 ₽','6m':'27 000 ₽','12m':'49 000 ₽'};
+
+function copySubCardNumber() {
+  var cardText = document.getElementById('sub-card-number').textContent.replace(/\s/g,'');
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(cardText).then(function(){ showToast('Номер карты скопирован'); }).catch(function(){ showToast('Не удалось скопировать'); });
+  } else {
+    showToast('Скопируй номер вручную');
+  }
+}
+
+function contactManagerForSub() {
   var tg = window.Telegram && window.Telegram.WebApp;
   if(!tg) { showToast('Только в Telegram'); return; }
-  var chatId = myTgId;
-  if(!chatId) { showToast('Нет данных пользователя'); return; }
-  var btn = document.getElementById('sub-pay-btn');
-  if(btn) { btn.disabled = true; btn.textContent = '⏳ Создаём счёт...'; }
-  fetch('https://llobychev-manproduction-networking-server-6f2d.twc1.net/create-invoice', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ chat_id: chatId, plan: selectedPlan, bot: 'main' })
-  }).then(function(r){ return r.json(); }).then(function(data){
-    if(btn) { btn.disabled = false; btn.innerHTML = '⭐ Оплатить через Telegram Stars'; }
-    if(data.ok) {
-      showToast('Счёт отправлен в чат с ботом');
-      trackEvent('payment_initiated', {plan: selectedPlan, bot: 'main'});
-    } else {
-      showToast('Ошибка: ' + (data.error || 'попробуй снова'));
-    }
-  }).catch(function(){
-    if(btn) { btn.disabled = false; btn.innerHTML = '⭐ Оплатить через Telegram Stars'; }
-    showToast('Нет соединения с сервером');
-  });
+  var planLabel = SUB_PLAN_LABELS[selectedPlan] || selectedPlan;
+  var priceLabel = SUB_PLAN_PRICES_RUB[selectedPlan] || '';
+  trackEvent('payment_manager_contact', {plan: selectedPlan});
+  var text = encodeURIComponent('Здравствуй! Хочу оформить подписку ManClub на ' + planLabel + ' (' + priceLabel + '). Перевёл на карту, чек прикладываю.');
+  tg.openTelegramLink('https://t.me/job_bylobychevinsibir?text=' + text);
 }
 function ckDlPdf(){showToast('Генерация PDF...');}
 function ckDlImg(){showToast('Генерация картинки...');}
