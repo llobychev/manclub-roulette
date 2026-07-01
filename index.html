@@ -92,8 +92,8 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .ck-view.active{display:flex;}
 .ck-progress{width:100%;height:4px;background:var(--bg3);border-radius:2px;margin-bottom:20px;overflow:hidden;}
 .ck-progress-fill{height:100%;background:var(--accent);transition:width .3s;}
-.ck-step{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.ck-q{font-size:17px;font-weight:500;line-height:1.4;margin-bottom:20px;}
+.ck-step{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.ck-q{font-size:17px;font-weight:500;line-height:1.4;margin-bottom:20px;color:var(--text);}
 .ck-scale{display:flex;gap:8px;margin-bottom:10px;}
 .ck-scale-btn{flex:1;padding:10px 6px;border:1px solid #333;background:var(--bg2);border-radius:8px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text);}
 .ck-scale-btn:hover,.ck-scale-btn.sel{border-color:var(--accent);}
@@ -116,7 +116,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .ck-ch{padding:14px 10px;border:1px solid #333;background:var(--bg2);border-radius:8px;cursor:pointer;text-align:center;transition:all .2s;}
 .ck-ch:hover,.ck-ch.sel{border-color:var(--accent);}
 .ck-ch-e{font-size:28px;margin-bottom:6px;}
-.ck-ch-t{font-size:11px;line-height:1.3;color:#ccc;}
+.ck-ch-t{font-size:11px;line-height:1.3;color:var(--text);}
 /* Tarot */
 .ck-tarot-wrap{position:relative;height:260px;overflow:hidden;margin-bottom:12px;}
 .ck-tarot-track{display:flex;align-items:center;height:100%;gap:14px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);padding:0 14px;}
@@ -136,7 +136,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .ck-cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .ck-cmp-c{border:2px solid #333;border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:var(--bg2);transition:all .2s;}
 .ck-cmp-c:hover,.ck-cmp-c.sel{border-color:var(--accent);}
-.ck-cmp-n{font-size:13px;font-weight:600;margin:6px 0 4px;}
+.ck-cmp-n{font-size:13px;font-weight:600;margin:6px 0 4px;color:var(--text);}
 .ck-cmp-d{font-size:10px;color:var(--text3);line-height:1.3;}
 /* Loading */
 .ck-loading{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
@@ -156,7 +156,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .cl-chk{width:20px;height:20px;border:2px solid #555;border-radius:4px;flex-shrink:0;cursor:pointer;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .cl-chk.done{background:var(--accent);border-color:var(--accent);}
 .cl-chk.done::after{content:'✓';color:var(--bg);font-size:11px;font-weight:700;}
-.cl-it-t{font-size:12px;font-weight:600;margin-bottom:3px;}
+.cl-it-t{font-size:12px;font-weight:600;margin-bottom:3px;color:var(--text);}
 .cl-it-d{font-size:11px;color:var(--text3);line-height:1.4;}
 .cl-prog{margin-bottom:16px;}
 .cl-prog-t{font-size:11px;color:var(--text3);margin-bottom:4px;}
@@ -169,12 +169,12 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
 /* === WHEEL LAYOUT === */
 .wheel-wrap{display:flex;flex-direction:column;height:calc(100vh - 130px);min-height:380px;}
-.wheel-pointer-top{display:flex;justify-content:center;padding-top:12px;flex-shrink:0;z-index:10;position:relative;}
+.wheel-pointer-wrap{display:flex;justify-content:center;padding:0;z-index:10;position:relative;flex-shrink:0;}
 .wheel-crop{flex:1;position:relative;overflow:hidden;display:flex;justify-content:center;align-items:flex-end;}
 .wheel-stage{position:relative;width:420px;height:420px;flex-shrink:0;margin-bottom:-120px;}
 .wheel-svg{width:100%;height:100%;transition:transform 3.6s cubic-bezier(0.17,0.89,0.32,1.27);}
 .wheel-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;background:var(--bg2);border:4px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:26px;z-index:5;}
-.wheel-pointer{width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:29px solid var(--gold);}
+.wheel-pointer-wrap{display:flex;justify-content:center;padding:0;z-index:10;position:relative;flex-shrink:0;}.wheel-pointer-tri{width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:24px solid var(--gold);}
 .wheel-bottom-bar{flex-shrink:0;padding:12px 16px 10px;background:var(--bg);border-top:0.5px solid var(--border);}
 .spin-btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--gold);color:#1A1A1A;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none;}
 .spin-btn:disabled{background:var(--bg3);color:var(--text3);cursor:default;}
@@ -246,6 +246,22 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .ck-mini-prog{height:3px;background:var(--bg3);}
 .ck-mini-prog-fill{height:100%;background:var(--gold);}
 .section-label{font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+/* CALENDAR */
+.cal-day-box{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:8px;padding:5px 2px;background:var(--bg2);border:1px solid #2a2a2a;position:relative;}
+.cal-day-box.cal-past{opacity:0.35;}
+.cal-day-box.cal-today{border-color:var(--gold);background:#1e1a10;}
+.cal-day-box.cal-future{opacity:0.45;}
+.cal-day-box.cal-collected{opacity:0.4;}
+.cal-dname{font-size:8px;color:var(--text3);text-transform:uppercase;}
+.cal-day-box.cal-today .cal-dname{color:var(--gold);}
+.cal-ticon{font-size:12px;line-height:1;}
+.cal-tcnt{font-size:10px;font-weight:700;color:var(--text);}
+.cal-day-box.cal-today .cal-tcnt{color:var(--gold);}
+.cal-collect-btn{font-size:7px;font-weight:700;color:#1A1A1A;background:var(--gold);border-radius:4px;padding:2px 4px;margin-top:1px;border:none;cursor:pointer;}
+.cal-dot{width:5px;height:5px;border-radius:50%;background:#2e7d32;position:absolute;top:-3px;right:-3px;border:1px solid var(--bg);}
+/* CONFETTI */
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+.confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:9999;animation:confetti-fall 2.5s ease-in forwards;}
 </style>
 </head>
 <body>
@@ -267,10 +283,23 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 <!-- MAIN APP -->
 <div class="screen" id="main-app" style="display:none;">
   <div class="app-screen active" id="s-roulette" style="flex:1;display:flex;flex-direction:column;overflow-y:auto;">
-    <div class="topbar"><div><div class="topbar-logo">🎰 Колесо удачи</div><div class="topbar-sub">Крути раз в день</div></div></div>
+    <div class="topbar">
+      <div><div class="topbar-logo">🎰 Колесо удачи</div><div class="topbar-sub">Крути раз в день</div></div>
+      <div id="spin-counter-badge" style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;">
+        <span style="font-size:10px;color:var(--text3);">Спин</span>
+        <span id="spin-num" style="font-size:11px;font-weight:700;color:var(--accent);">#0</span>
+        <span style="font-size:10px;color:var(--text3);">· Билеты</span>
+        <span id="spin-tickets-count" style="font-size:11px;font-weight:700;color:var(--accent);">0 🎫</span>
+      </div>
+    </div>
+    <!-- КАЛЕНДАРЬ НЕДЕЛЬНЫХ БИЛЕТОВ -->
+    <div style="padding:0 16px 12px;" id="calendar-block">
+      <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Билеты на неделю</div>
+      <div id="cal-days-row" style="display:flex;gap:5px;"></div>
+    </div>
     <div class="content">
       <div class="wheel-wrap">
-        <div class="wheel-pointer-top"><div class="wheel-pointer"></div></div>
+        <div class="wheel-pointer-wrap"><div class="wheel-pointer-tri"></div></div>
         <div class="wheel-crop">
           <div class="wheel-stage">
             <svg class="wheel-svg" id="wheel-svg" viewBox="0 0 420 420"></svg>
@@ -529,87 +558,107 @@ function trackEvent(eventName, data) {
 var myTgName='';
 var myUser=null;
 
-// DECORATIVE WHEEL — 8 visual segments, unrelated to the real prize draw below.
-// With 19 weighted real prizes across 5 unlock stages, a literal 1:1 mapping of
-// wheel segment -> prize isn't practical without redrawing the wheel every spin.
-// The wheel landing is just visual flavor; the real prize always comes from
-// pickWeightedPrize() and is shown in the result modal after the animation ends.
+// КОЛЕСО — 6 сегментов по категориям призов
+// Размер сегмента пропорционален весу категории (сумма весов = 100)
 var WHEEL_VISUAL=[
-  {icon:'🎉',color:'#C9A84C'},{icon:'🎁',color:'#2E2E2E'},
-  {icon:'💎',color:'#C9A84C'},{icon:'🔑',color:'#2E2E2E'},
-  {icon:'📚',color:'#C9A84C'},{icon:'🎫',color:'#2E2E2E'},
-  {icon:'🔁',color:'#C9A84C'},{icon:'✨',color:'#2E2E2E'},
-  {icon:'⭐',color:'#C9A84C'},{icon:'🏆',color:'#2E2E2E'},
-  {icon:'🎊',color:'#C9A84C'},{icon:'💫',color:'#2E2E2E'}
+  {id:'ticket',  icon:'🎫', color:'#C9A84C', weight:35},
+  {id:'lesson',  icon:'📚', color:'#2E2E2E', weight:35},
+  {id:'spin',    icon:'🔁', color:'#C9A84C', weight:8},
+  {id:'demo',    icon:'🔑', color:'#2E2E2E', weight:12},
+  {id:'discount',icon:'💎', color:'#C9A84C', weight:6},
+  {id:'sub',     icon:'🎁', color:'#2E2E2E', weight:4}
 ];
-var WHEEL_SEGMENT_ANGLE=360/WHEEL_VISUAL.length;
+var WHEEL_TOTAL_WEIGHT=WHEEL_VISUAL.reduce(function(s,x){return s+x.weight;},0);
+// Угол каждого сегмента пропорционален весу
+var WHEEL_SEGMENT_ANGLE=null; // не используется, углы считаем динамически
 
-// REAL PRIZE POOL — base weights assume totalSpins>=20 (everything unlocked).
-// minSpin: number of PAST completed spins required before this prize is eligible
-//   (e.g. minSpin:6 = unlocks starting on the 7th spin).
-// maxSpin: prize stops being eligible once totalSpins reaches this value
-//   (used only for the 4 lesson slots that convert into demo-access prizes).
-// Lesson titles below are placeholders (5 М Protocol spheres + 2 generic) —
-// real titles/topics can be swapped in later without touching the logic.
+// ===== ПРИЗОВОЙ ПУЛ — 6 категорий =====
+// Категории: ticket(35), lesson(35), spin(8), demo(12), discount(6), sub(4)
+// Кулдауны: demo — 14 дней, discount — 30 дней, sub — навсегда после первого выигрыша
+// Внутри каждой категории — weighted random по конкретному призу
+var PRIZE_CATEGORIES=[
+  {id:'ticket', icon:'🎫', weight:35},
+  {id:'lesson', icon:'📚', weight:35},
+  {id:'spin',   icon:'🔁', weight:8},
+  {id:'demo',   icon:'🔑', weight:12},
+  {id:'discount',icon:'💎',weight:6},
+  {id:'sub',    icon:'🎁', weight:4}
+];
+
 var PRIZE_POOL=[
-  {id:'discount5',cat:'discount',icon:'🎉',title:'Скидка 5%',weight:2,minSpin:0,
-    desc:'Скидка 5% при оплате подписки ManClub на 6 месяцев. Не действует при продлении.'},
-  {id:'discount15',cat:'discount',icon:'🎊',title:'Скидка 15%',weight:3,minSpin:9,
-    desc:'Скидка 15% при оплате подписки ManClub ровно на 2 месяца. Не действует при продлении.'},
-  {id:'discount50',cat:'discount',icon:'💎',title:'Скидка 50%',weight:1,minSpin:20,
-    desc:'Скидка 50% при оплате подписки ManClub на 3 месяца и более. Не действует при продлении.'},
-  {id:'ticket',cat:'ticket',icon:'🎫',title:'Билет на чекап',weight:20,minSpin:0,
+  {id:'ticket',cat:'ticket',icon:'🎫',title:'Билет на чекап',
     desc:'Теперь можно пройти тест и получить персональный чек-лист по своей слабой сфере.'},
-  {id:'sub1',cat:'sub',icon:'🎁',title:'Подписка на 1 месяц',weight:2,minSpin:0,months:1,
-    desc:'Бесплатная подписка на основной клуб ManClub на 1 месяц.'},
-  {id:'spin2',cat:'spin',icon:'🔁',title:'+2 попытки сегодня',weight:7,minSpin:0,extra:2,
+  {id:'spin2',cat:'spin',icon:'🔁',title:'+2 попытки сегодня',extra:2,
     desc:'Можно крутить колесо ещё 2 раза сегодня.'},
-  {id:'demo2w',cat:'demo',icon:'🔑',title:'Демо-доступ на 2 недели',weight:11,minSpin:6,days:14,
+  {id:'demo2w',cat:'demo',icon:'🔑',title:'Демо-доступ на 2 недели',days:14,demoWeight:11,
     desc:'Демо-доступ к основному приложению ManClub на 2 недели.'},
-  {id:'demo1m',cat:'demo',icon:'🔑',title:'Демо-доступ на 1 месяц',weight:5,minSpin:6,days:30,
+  {id:'demo1m',cat:'demo',icon:'🔑',title:'Демо-доступ на 1 месяц',days:30,demoWeight:5,
     desc:'Демо-доступ к основному приложению ManClub на 1 месяц.'},
-  {id:'lesson1',cat:'lesson',icon:'📚',title:'Бесплатный урок: Тело',weight:7,minSpin:0,
+  {id:'discount5',cat:'discount',icon:'💎',title:'Скидка 5%',discWeight:6,
+    desc:'Скидка 5% при оплате подписки ManClub на 6 месяцев. Не действует при продлении.'},
+  {id:'discount15',cat:'discount',icon:'💎',title:'Скидка 15%',discWeight:3,
+    desc:'Скидка 15% при оплате подписки ManClub на 2 месяца. Не действует при продлении.'},
+  {id:'discount50',cat:'discount',icon:'💎',title:'Скидка 50%',discWeight:1,
+    desc:'Скидка 50% при оплате подписки ManClub на 3 месяца и более. Не действует при продлении.'},
+  {id:'sub1',cat:'sub',icon:'🎁',title:'Подписка на 1 месяц',months:1,
+    desc:'Бесплатная подписка на основной клуб ManClub на 1 месяц.'},
+  {id:'lesson1',cat:'lesson',icon:'📚',title:'Бесплатный урок: Тело',
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson2',cat:'lesson',icon:'📚',title:'Бесплатный урок: Деньги',weight:7,minSpin:0,
+  {id:'lesson2',cat:'lesson',icon:'📚',title:'Бесплатный урок: Деньги',
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson3',cat:'lesson',icon:'📚',title:'Бесплатный урок: Люди',weight:7,minSpin:0,
+  {id:'lesson3',cat:'lesson',icon:'📚',title:'Бесплатный урок: Люди',
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson4',cat:'lesson',icon:'📚',title:'Бесплатный урок: Голова',weight:7,minSpin:0,maxSpin:6,
+  {id:'lesson4',cat:'lesson',icon:'📚',title:'Бесплатный урок: Голова',
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson5',cat:'lesson',icon:'📚',title:'Бесплатный урок: Смысл',weight:7,minSpin:0,maxSpin:6,
+  {id:'lesson5',cat:'lesson',icon:'📚',title:'Бесплатный урок: Смысл',
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson6',cat:'lesson',icon:'📚',title:'Бонусный урок: Дисциплина',weight:7,minSpin:0,maxSpin:6,
+  {id:'lesson6',cat:'lesson',icon:'📚',title:'Бонусный урок: Дисциплина',
     desc:'Урок открыт. Появится в разделе Подарки.'},
-  {id:'lesson7',cat:'lesson',icon:'📚',title:'Бонусный урок: Энергия',weight:7,minSpin:0,maxSpin:6,
+  {id:'lesson7',cat:'lesson',icon:'📚',title:'Бонусный урок: Энергия',
     desc:'Урок открыт. Появится в разделе Подарки.'}
 ];
 
-function getEligiblePrizes(totalSpins){
-  return PRIZE_POOL.filter(function(p){
-    if(totalSpins<p.minSpin)return false;
-    if(p.maxSpin!==undefined&&totalSpins>=p.maxSpin)return false;
-    return true;
-  });
+// Состояние кулдаунов (загружается из Firestore вместе с userState)
+var cooldowns={lastDemoWon:0,lastDiscountWon:0,subWon:false};
+
+function isCatOnCooldown(catId){
+  var now=Date.now();
+  if(catId==='demo')return cooldowns.lastDemoWon>0&&(now-cooldowns.lastDemoWon)<14*24*60*60*1000;
+  if(catId==='discount')return cooldowns.lastDiscountWon>0&&(now-cooldowns.lastDiscountWon)<30*24*60*60*1000;
+  if(catId==='sub')return cooldowns.subWon===true;
+  return false;
 }
 
-// Weight of every ineligible prize is implicitly redistributed, since we only
-// sum and draw from the currently-eligible subset — this is the agreed
-// "proportional redistribution" rule with zero extra bookkeeping.
-function pickWeightedPrize(totalSpins){
-  var pool=getEligiblePrizes(totalSpins);
+function pickWeightedPrize(){
+  // Выбираем категорию (с учётом кулдаунов)
+  var cats=PRIZE_CATEGORIES.filter(function(c){return !isCatOnCooldown(c.id);});
   var sum=0,i;
-  for(i=0;i<pool.length;i++)sum+=pool[i].weight;
-  var r=Math.random()*sum,acc=0;
-  for(i=0;i<pool.length;i++){
-    acc+=pool[i].weight;
-    if(r<acc)return pool[i];
+  for(i=0;i<cats.length;i++)sum+=cats[i].weight;
+  var r=Math.random()*sum,acc=0,chosenCat=cats[cats.length-1];
+  for(i=0;i<cats.length;i++){acc+=cats[i].weight;if(r<acc){chosenCat=cats[i];break;}}
+
+  // Выбираем конкретный приз внутри категории
+  var pool=PRIZE_POOL.filter(function(p){return p.cat===chosenCat.id;});
+  if(!pool.length)return PRIZE_POOL[0];
+
+  // Для demo и discount — внутренние веса
+  if(chosenCat.id==='demo'){
+    var ds=0;pool.forEach(function(p){ds+=p.demoWeight||1;});
+    var dr=Math.random()*ds,da=0;
+    for(i=0;i<pool.length;i++){da+=pool[i].demoWeight||1;if(dr<da)return pool[i];}
   }
-  return pool[pool.length-1];
+  if(chosenCat.id==='discount'){
+    var ks=0;pool.forEach(function(p){ks+=p.discWeight||1;});
+    var kr=Math.random()*ks,ka=0;
+    for(i=0;i<pool.length;i++){ka+=pool[i].discWeight||1;if(kr<ka)return pool[i];}
+  }
+  // Для остальных — равновероятно
+  return pool[Math.floor(Math.random()*pool.length)];
 }
 
 var isSpinning=false;
 var lastSpinResult=null;
-var userState={totalSpins:0,extraSpinsToday:0,lastSpinDate:'',checkupTickets:0};
+var userState={totalSpins:0,extraSpinsToday:0,lastSpinDate:'',checkupTickets:0,calendarCollectedDate:''};
 
 // ===== СТИКЕРЫ ЛЁВЫ =====
 var STICKERS_PACK_URL='https://t.me/addstickers/lyovaManClub';
@@ -744,9 +793,117 @@ function submitRegistration(){
   });
 }
 
+// ===== КОНФЕТТИ =====
+function showConfetti(){
+  var colors=['#C9A84C','#fff','#f0c040','#fff8e0','#e0c080'];
+  for(var i=0;i<40;i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.className='confetti-piece';
+        el.style.left=Math.random()*100+'vw';
+        el.style.background=colors[Math.floor(Math.random()*colors.length)];
+        el.style.animationDelay=(Math.random()*0.5)+'s';
+        el.style.animationDuration=(2+Math.random())+'s';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},3500);
+      },i*30);
+    })(i);
+  }
+}
+
+// ===== КАЛЕНДАРЬ НЕДЕЛЬНЫХ БИЛЕТОВ =====
+// Детерминированный рандом по дате: одинаково для всех юзеров в один день
+function calDayTickets(dateStr){
+  var hash=0;
+  for(var j=0;j<dateStr.length;j++)hash=(hash*31+dateStr.charCodeAt(j))&0xffffffff;
+  // ~20% шанс на 2 билета, остальное — 1
+  return ((hash>>>0)%10)<2?2:1;
+}
+
+function calWeekDates(){
+  var dates=[];
+  var today=new Date();
+  var dow=today.getDay()||7; // 1=пн ... 7=вс
+  var mon=new Date(today);
+  mon.setDate(today.getDate()-(dow-1));
+  for(var i=0;i<7;i++){
+    var d=new Date(mon);
+    d.setDate(mon.getDate()+i);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function calDateStr(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+var CAL_DAY_NAMES=['пн','вт','ср','чт','пт','сб','вс'];
+
+function renderCalendar(){
+  var row=document.getElementById('cal-days-row');
+  if(!row)return;
+  var dates=calWeekDates();
+  var todayStr=todayDateStr();
+  var collected=userState.calendarCollectedDate;
+  row.innerHTML='';
+  dates.forEach(function(d,i){
+    var ds=calDateStr(d);
+    var tickets=calDayTickets(ds);
+    var isPast=ds<todayStr;
+    var isToday=ds===todayStr;
+    var isFuture=ds>todayStr;
+    var isCollected=collected===ds;
+
+    var box=document.createElement('div');
+    var cls='cal-day-box'+(isPast?' cal-past':isToday?' cal-today':' cal-future')+(isCollected?' cal-collected':'');
+    box.className=cls;
+
+    // Зелёная точка — собрано
+    if(isPast&&isCollected)box.innerHTML+='<div class="cal-dot"></div>';
+
+    box.innerHTML+='<div class="cal-dname">'+CAL_DAY_NAMES[i]+'</div>';
+    box.innerHTML+='<div class="cal-ticon">🎫</div>';
+    box.innerHTML+='<div class="cal-tcnt">×'+tickets+'</div>';
+
+    if(isToday&&!isCollected){
+      var btn=document.createElement('button');
+      btn.className='cal-collect-btn';
+      btn.textContent='Забрать';
+      btn.onclick=function(){collectCalendarTickets(tickets,ds);};
+      box.appendChild(btn);
+    }
+    row.appendChild(box);
+  });
+}
+
+function collectCalendarTickets(count,ds){
+  if(!fbDb||!myTgId)return;
+  userState.checkupTickets=(userState.checkupTickets||0)+count;
+  userState.calendarCollectedDate=ds;
+  fbDb.collection('roulette_spins').doc(myTgId).set({
+    checkupTickets:userState.checkupTickets,
+    calendarCollectedDate:ds
+  },{merge:true}).catch(function(){});
+  renderCalendar();
+  updateSpinCounter();
+  renderCheckupTab();
+  showToast('🎫 Получено '+count+' билет'+(count===1?'':' а')+' на чекап!');
+}
+
+function updateSpinCounter(){
+  var numEl=document.getElementById('spin-num');
+  var tickEl=document.getElementById('spin-tickets-count');
+  if(numEl)numEl.textContent='#'+(userState.totalSpins||0);
+  if(tickEl)tickEl.textContent=(userState.extraSpinsToday||0)+' 🎫';
+}
+
 function launchApp(){
   showScreen('main-app');
   checkSpinAvailability();
+  renderCalendar();
+  updateSpinCounter();
   trackEvent('app_open',{});
 }
 
@@ -1264,9 +1421,13 @@ function ckSaveChecklist(key,title,total,done,items){
   if(!fbDb||!myTgId)return;
   clearTimeout(ckSaveTimer);
   ckSaveTimer=setTimeout(function(){
-    var upd={};
-    upd['lists.'+key]={key:key,title:title,total:total,done:done,items:items,updatedAt:Date.now()};
-    fbDb.collection('roulette_checklists').doc(myTgId).set(upd,{merge:true}).catch(function(){});
+    var ref=fbDb.collection('roulette_checklists').doc(myTgId);
+    ref.get().then(function(doc){
+      var data=(doc.exists&&doc.data())||{};
+      var lists=data.lists||{};
+      lists[key]={key:key,title:title,total:total,done:done,items:items,updatedAt:Date.now()};
+      return ref.set({lists:lists},{merge:true});
+    }).catch(function(){});
   },300);
 }
 function ckOpenSub(){
@@ -1375,20 +1536,31 @@ function polarToCartesian(cx,cy,r,angleDeg){
   var rad=(angleDeg-90)*Math.PI/180;
   return {x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};
 }
+// Стартовые углы каждого сегмента (вычисляется один раз)
+var WHEEL_SEG_STARTS=[];
+(function(){
+  var acc=0;
+  WHEEL_VISUAL.forEach(function(seg){
+    WHEEL_SEG_STARTS.push(acc);
+    acc+=seg.weight/WHEEL_TOTAL_WEIGHT*360;
+  });
+})();
+
 function drawWheel(){
   var svg=document.getElementById('wheel-svg');
   var cx=210,cy=210,r=200;
   var html='';
   WHEEL_VISUAL.forEach(function(seg,i){
-    var startAngle=i*WHEEL_SEGMENT_ANGLE;
-    var endAngle=startAngle+WHEEL_SEGMENT_ANGLE;
+    var startAngle=WHEEL_SEG_STARTS[i];
+    var segAngle=seg.weight/WHEEL_TOTAL_WEIGHT*360;
+    var endAngle=startAngle+segAngle;
     var start=polarToCartesian(cx,cy,r,startAngle);
     var end=polarToCartesian(cx,cy,r,endAngle);
-    var largeArc=WHEEL_SEGMENT_ANGLE>180?1:0;
+    var largeArc=segAngle>180?1:0;
     html+='<path d="M'+cx+','+cy+' L'+start.x.toFixed(2)+','+start.y.toFixed(2)+' A'+r+','+r+' 0 '+largeArc+' 1 '+end.x.toFixed(2)+','+end.y.toFixed(2)+' Z" fill="'+seg.color+'" stroke="#0D0D0D" stroke-width="1.5"/>';
-    var midAngle=startAngle+WHEEL_SEGMENT_ANGLE/2;
-    var iconPos=polarToCartesian(cx,cy,r*0.76,midAngle);
-    html+='<text x="'+iconPos.x.toFixed(2)+'" y="'+iconPos.y.toFixed(2)+'" font-size="24" text-anchor="middle" dominant-baseline="middle">'+seg.icon+'</text>';
+    var midAngle=startAngle+segAngle/2;
+    var iconPos=polarToCartesian(cx,cy,r*0.72,midAngle);
+    html+='<text x="'+iconPos.x.toFixed(2)+'" y="'+iconPos.y.toFixed(2)+'" font-size="26" text-anchor="middle" dominant-baseline="middle">'+seg.icon+'</text>';
   });
   svg.innerHTML=html;
 }
@@ -1405,9 +1577,14 @@ function loadUserState(cb){
       var d=doc.data();
       userState.totalSpins=d.totalSpins||0;
       userState.lastSpinDate=d.lastSpinDate||'';
-      // extra attempts never carry over to a new day
       userState.extraSpinsToday=(d.lastSpinDate===todayDateStr())?(d.extraSpinsToday||0):0;
       userState.checkupTickets=d.checkupTickets||0;
+      // Кулдауны призов
+      cooldowns.lastDemoWon=d.lastDemoWon||0;
+      cooldowns.lastDiscountWon=d.lastDiscountWon||0;
+      cooldowns.subWon=d.subWon||false;
+      // Календарные билеты
+      userState.calendarCollectedDate=d.calendarCollectedDate||'';
     }
     cb&&cb();
   }).catch(function(err){console.warn(err);cb&&cb();});
@@ -1419,6 +1596,7 @@ function checkSpinAvailability(){
     var btn=document.getElementById('spin-btn');
     var status=document.getElementById('spin-status');
     var spunToday=userState.lastSpinDate===todayDateStr();
+    var totalAttempts=(spunToday?userState.extraSpinsToday:1);
     if(spunToday&&userState.extraSpinsToday<=0){
       btn.disabled=true;
       btn.textContent='Уже крутили сегодня';
@@ -1426,10 +1604,10 @@ function checkSpinAvailability(){
     } else {
       btn.disabled=false;
       btn.textContent='Крутить';
-      status.textContent=(spunToday&&userState.extraSpinsToday>0)
-        ?('Осталось доп. попыток сегодня: '+userState.extraSpinsToday)
-        :'Один бесплатный спин в день';
+      status.textContent='Осталось попыток сегодня: '+totalAttempts;
     }
+    updateSpinCounter();
+    renderCalendar();
     renderCheckupTab();
     renderDemoTab();
   });
@@ -1438,18 +1616,22 @@ function checkSpinAvailability(){
 function spinWheel(){
   if(isSpinning)return;
   var spunToday=userState.lastSpinDate===todayDateStr();
-  if(spunToday&&userState.extraSpinsToday<=0){showToast('Сегодня попыток больше нет');return;}
+  if(spunToday&&userState.extraSpinsToday<=0){showToast('Сегодня попыток больше нет. Забери билеты из календаря!');return;}
   isSpinning=true;
   document.getElementById('spin-btn').disabled=true;
 
-  var prize=pickWeightedPrize(userState.totalSpins);
+  var prize=pickWeightedPrize();
   trackEvent('spin_start',{totalSpins:userState.totalSpins});
 
-  // Decorative landing only — random visual segment, unrelated to the real prize.
-  var visualIdx=Math.floor(Math.random()*WHEEL_VISUAL.length);
-  var segmentCenter=visualIdx*WHEEL_SEGMENT_ANGLE+WHEEL_SEGMENT_ANGLE/2;
-  var fullSpins=4*360;
-  var targetRotation=fullSpins+(360-segmentCenter);
+  // Вращаем к реальному выигрышному сегменту
+  var winIdx=WHEEL_VISUAL.findIndex(function(s){return s.id===prize.cat;});
+  if(winIdx<0)winIdx=0;
+  var segStart=WHEEL_SEG_STARTS[winIdx];
+  var segAngle=WHEEL_VISUAL[winIdx].weight/WHEEL_TOTAL_WEIGHT*360;
+  // Останавливаем так, чтобы стрелка (top=0) смотрела в центр выигрышного сегмента
+  var segCenter=segStart+segAngle/2;
+  var fullSpins=5*360;
+  var targetRotation=fullSpins+(360-segCenter);
   document.getElementById('wheel-svg').style.transform='rotate('+targetRotation+'deg)';
 
   setTimeout(function(){
@@ -1461,10 +1643,18 @@ function spinWheel(){
 
 function applyPrizeAndRecord(prize,wasSpunToday){
   var newExtra=userState.extraSpinsToday;
-  if(wasSpunToday)newExtra=Math.max(0,newExtra-1); // this spin consumed an extra attempt
-  if(prize.cat==='spin')newExtra+=prize.extra;     // this spin's own prize grants more
+  if(wasSpunToday)newExtra=Math.max(0,newExtra-1);
+  if(prize.cat==='spin')newExtra+=prize.extra;
 
   var newTickets=userState.checkupTickets+(prize.cat==='ticket'?1:0);
+
+  // Обновляем кулдауны
+  var newLastDemo=cooldowns.lastDemoWon;
+  var newLastDisc=cooldowns.lastDiscountWon;
+  var newSubWon=cooldowns.subWon;
+  if(prize.cat==='demo')newLastDemo=Date.now();
+  if(prize.cat==='discount')newLastDisc=Date.now();
+  if(prize.cat==='sub')newSubWon=true;
 
   var updates={
     userId:myTgId,
@@ -1473,7 +1663,10 @@ function applyPrizeAndRecord(prize,wasSpunToday){
     updatedAt:Date.now(),
     totalSpins:userState.totalSpins+1,
     extraSpinsToday:newExtra,
-    checkupTickets:newTickets
+    checkupTickets:newTickets,
+    lastDemoWon:newLastDemo,
+    lastDiscountWon:newLastDisc,
+    subWon:newSubWon
   };
 
   trackEvent('spin_result',{prizeId:prize.id,prizeCategory:prize.cat,totalSpins:userState.totalSpins+1});
@@ -1494,8 +1687,13 @@ function applyPrizeAndRecord(prize,wasSpunToday){
     userState.lastSpinDate=updates.lastSpinDate;
     userState.extraSpinsToday=updates.extraSpinsToday;
     userState.checkupTickets=updates.checkupTickets;
+    cooldowns.lastDemoWon=updates.lastDemoWon;
+    cooldowns.lastDiscountWon=updates.lastDiscountWon;
+    cooldowns.subWon=updates.subWon;
 
+    if(prize.cat==='sub'||prize.id==='discount50')showConfetti();
     showResultModal(prize);
+    updateSpinCounter();
   }).catch(function(err){
     console.warn('Failed to record spin',err);
     showToast('Ошибка, попробуй снова');
@@ -1857,18 +2055,18 @@ function cpShowLegal(doc){
 .lv-final button{background:var(--gold);color:#1A1A1A;border:none;padding:12px 28px;border-radius:24px;font-weight:700;font-size:13px;cursor:pointer;}
 </style>
 
-<div class="lv-fab" id="lvFab"><span>L</span><div class="lv-fab-dot" id="lvFabDot"></div></div>
+<div class="lv-fab" id="lvFab">🦁<div class="lv-fab-dot" id="lvFabDot"></div></div>
 
 <div class="lv-chat" id="lvChat">
   <div class="lv-chat-head">
-    <div class="lv-av">L</div>
-    <div class="lv-nm"><b>Lyova</b><span>Mentor . Brother . Leader</span></div>
-    <div class="lv-x" id="lvChatClose">x</div>
+    <div class="lv-av">🦁</div>
+    <div class="lv-nm"><b>Лёва</b><span>Ассистент · Наставник</span></div>
+    <div class="lv-x" id="lvChatClose">✕</div>
   </div>
   <div class="lv-chat-body" id="lvChatBody"></div>
   <div class="lv-chat-input">
-    <input id="lvChatInput" placeholder="Sprosi Lyovu...">
-    <div class="lv-snd" id="lvChatSend">&gt;</div>
+    <input id="lvChatInput" placeholder="Спроси Лёву...">
+    <div class="lv-snd" id="lvChatSend">→</div>
   </div>
 </div>
 
@@ -1878,19 +2076,19 @@ function cpShowLegal(doc){
   <div id="lvTtText"></div>
   <div class="lv-tt-nav">
     <span id="lvTtProgress"></span>
-    <button id="lvTtNext">Dalshe</button>
+    <button id="lvTtNext">Далее →</button>
   </div>
 </div>
-<div class="lv-skip" id="lvSkip">Propustit tur</div>
+<div class="lv-skip" id="lvSkip">Пропустить</div>
 
 <div class="lv-final" id="lvFinal">
   <div class="lv-dots">
     <span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span>
   </div>
   <div class="lv-av">L</div>
-  <h3>Gotovo, bro</h3>
+  <h3>Готово, бро 🦁</h3>
   <p id="lvFinalText"></p>
-  <button id="lvFinalClose">Ponyal, poghali</button>
+  <button id="lvFinalClose">Понял, погнали</button>
 </div>
 
 <script>
@@ -2120,7 +2318,7 @@ function lvShowTutorialStep(i){
     lvPositionHighlight(step.targetSelector);
     document.getElementById('lvTtTitle').textContent=step.title;
     document.getElementById('lvTtText').textContent=step.text;
-    document.getElementById('lvTtProgress').textContent=(i+1)+' iz '+lvActiveSteps.length;
+    document.getElementById('lvTtProgress').textContent=(i+1)+' из '+lvActiveSteps.length;
     document.getElementById('lvTt').classList.add('active');
     document.getElementById('lvSkip').classList.add('active');
   },250);
@@ -2177,7 +2375,10 @@ function lvSkipTutorial(){
 }
 
 function lvAutoCheckTutorial(){
-  if(!fbDb||!myTgId){return;}
+  if(!fbDb||!myTgId)return;
+  // Быстрая проверка: myUser уже загружен при старте приложения
+  if(myUser&&myUser.tutorialCompleted)return;
+  // Медленная проверка: дополнительный запрос к Firestore на случай гонки
   fbDb.collection('users').doc(myTgId).get().then(function(doc){
     var data=doc.exists?doc.data():{};
     if(!data.tutorialCompleted){
@@ -2187,7 +2388,7 @@ function lvAutoCheckTutorial(){
         lvTutorialRunning=true;
         lvTutorialIndex=0;
         lvShowTutorialStep(0);
-        fbDb.collection('tutorial_progress').doc(myTgId).set({tgId:myTgId,completed:false,lastStep:0,startedAt:firebase.firestore.FieldValue.serverTimestamp(),triggeredBy:'auto'},{merge:true}).catch(function(){});
+        if(fbDb&&myTgId)fbDb.collection('tutorial_progress').doc(myTgId).set({tgId:myTgId,completed:false,lastStep:0,startedAt:firebase.firestore.FieldValue.serverTimestamp(),triggeredBy:'auto'},{merge:true}).catch(function(){});
       },1200);
     }
   }).catch(function(){});
