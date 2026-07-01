@@ -174,7 +174,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 .wheel-stage{position:relative;width:420px;height:420px;flex-shrink:0;margin-bottom:-120px;}
 .wheel-svg{width:100%;height:100%;transition:transform 3.6s cubic-bezier(0.17,0.89,0.32,1.27);}
 .wheel-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;background:var(--bg2);border:4px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:26px;z-index:5;}
-.wheel-pointer-wrap{display:flex;justify-content:center;padding:0;z-index:10;position:relative;flex-shrink:0;}.wheel-pointer-tri{width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:24px solid var(--gold);}
+.wheel-pointer-abs{position:absolute;bottom:300px;left:50%;transform:translateX(-50%);z-index:10;}.wheel-pointer-tri{width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:24px solid var(--gold);}
 .wheel-bottom-bar{flex-shrink:0;padding:12px 16px 10px;background:var(--bg);border-top:0.5px solid var(--border);}
 .spin-btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--gold);color:#1A1A1A;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none;}
 .spin-btn:disabled{background:var(--bg3);color:var(--text3);cursor:default;}
@@ -282,7 +282,7 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
 
 <!-- MAIN APP -->
 <div class="screen" id="main-app" style="display:none;">
-  <div class="app-screen active" id="s-roulette" style="flex:1;display:flex;flex-direction:column;overflow-y:auto;">
+  <div class="app-screen active" id="s-roulette" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
     <div class="topbar">
       <div><div class="topbar-logo">🎰 Колесо удачи</div><div class="topbar-sub">Крути раз в день</div></div>
       <div id="spin-counter-badge" style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;">
@@ -299,8 +299,8 @@ html,body{height:100%;width:100%;background:var(--bg);font-family:-apple-system,
     </div>
     <div class="content">
       <div class="wheel-wrap">
-        <div class="wheel-pointer-wrap"><div class="wheel-pointer-tri"></div></div>
         <div class="wheel-crop">
+          <div class="wheel-pointer-abs"><div class="wheel-pointer-tri"></div></div>
           <div class="wheel-stage">
             <svg class="wheel-svg" id="wheel-svg" viewBox="0 0 420 420"></svg>
             <div class="wheel-hub">🎁</div>
@@ -1088,27 +1088,24 @@ function renderCheckupTab(){
       if(data&&tickets>0){
         rb.style.display='block';
         rb.querySelector('.ck-resume-txt').textContent='У тебя есть незавершённый чекап (вопрос '+(data.ckStep+1)+')';
-      } else {
-        rb.style.display='none';
-      }
+      }else{rb.style.display='none';}
     }
   });
-  // ticket banner
+  // Счётчик билетов — показываем всегда
   var banner=document.getElementById('ck-ticket-banner');
   var noMsg=document.getElementById('ck-no-ticket-msg');
   var startBtn=document.getElementById('ck-start-btn');
+  banner.style.display='block';
+  noMsg.style.display='none';
+  var wrap=document.getElementById('ck-ticket-wrap');
   if(tickets>0){
-    banner.style.display='block';
-    noMsg.style.display='none';
-    var wrap=document.getElementById('ck-ticket-wrap');
     wrap.innerHTML='<div class="ticket-dashed"></div><div class="ticket-inner"><div style="font-size:22px;margin-bottom:4px;">🎫</div><div class="ticket-count">'+tickets+'</div><div class="ticket-label">'+(tickets===1?'билет':'билета')+' на чекап</div></div>';
     startBtn.style.display='block';
-  } else {
-    banner.style.display='none';
-    noMsg.style.display='block';
+  }else{
+    wrap.innerHTML='<div class="ticket-dashed"></div><div class="ticket-inner"><div style="font-size:18px;margin-bottom:2px;">🎫</div><div class="ticket-count" style="font-size:16px;">0</div><div class="ticket-label">билетов · выиграй в рулетке</div></div>';
     startBtn.style.display='none';
   }
-  // load saved checklists from Firestore
+  // Чек-листы из Firestore — in-progress и done всегда, available только при билетах
   if(!fbDb)return;
   fbDb.collection('roulette_checklists').doc(myTgId).get().then(function(doc){
     var data=(doc.exists&&doc.data())||{};
@@ -1120,14 +1117,12 @@ function renderCheckupTab(){
       if(pct>=100)done.push(l);
       else if(l.done>0)inprog.push(l);
     });
-    // available = won a ticket but no checklist started yet — show CL_DATA keys not in lists
     var usedKeys=lists.map(function(l){return l.key;});
     Object.keys(CL_DATA).forEach(function(k){
-      if(usedKeys.indexOf(k)===-1&&tickets>0){avail.push({key:k,data:CL_DATA[k]});}
+      if(usedKeys.indexOf(k)===-1&&tickets>0)avail.push({key:k,data:CL_DATA[k]});
     });
     renderCkSection('ck-inprogress-section','ck-inprogress-list',inprog,'inprog');
     renderCkSection('ck-done-section','ck-done-list',done,'done');
-    // avail section
     var as=document.getElementById('ck-available-section');
     var al=document.getElementById('ck-available-list');
     if(avail.length>0){
@@ -1135,9 +1130,7 @@ function renderCheckupTab(){
       al.innerHTML=avail.slice(0,3).map(function(a){
         return '<div class="ck-list-card" onclick="ckStart()"><div class="ck-list-card-row"><div class="ck-list-emoji">'+a.data.e+'</div><div class="ck-list-info"><div class="ck-list-title">'+a.data.t+'</div><div class="ck-list-meta">'+a.data.sub+'</div></div><span class="ck-list-badge gold">Начать →</span></div></div>';
       }).join('');
-    } else {
-      as.style.display='none';
-    }
+    }else{as.style.display='none';}
   }).catch(function(){});
 }
 
@@ -1398,7 +1391,16 @@ function ckShowChecklist(si){
   document.getElementById('clBody').innerHTML=h;
   document.getElementById('clBody').dataset.total=total;
   document.getElementById('clBody').dataset.key=key;
-  ckSaveChecklist(key,cl.t,total,0,new Array(total).fill(false));
+  // Первый сейв — немедленно без debounce, чтобы не было гонки при быстром возврате
+  if(fbDb&&myTgId){
+    var ref=fbDb.collection('roulette_checklists').doc(myTgId);
+    ref.get().then(function(pdoc){
+      var pdata=(pdoc.exists&&pdoc.data())||{};
+      var plists=pdata.lists||{};
+      plists[key]={key:key,title:cl.t,total:total,done:0,items:new Array(total).fill(false),updatedAt:Date.now()};
+      return ref.set({lists:plists},{merge:true});
+    }).catch(function(){});
+  }
   ckLoadChecklistState(key,total);
 }
 function ckToggle(el){
