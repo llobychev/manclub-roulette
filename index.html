@@ -533,11 +533,17 @@ var firebaseConfig={
 var fbDb=null;
 function initFirebase(){
   try{
-    if(window.firebase&&!fbDb){
+    if(window.firebase&&firebase.apps&&firebase.apps.length===0){
       firebase.initializeApp(firebaseConfig);
-      fbDb=firebase.firestore();
     }
   }catch(e){console.warn('Firebase init failed',e);}
+}
+function initFirestoreAfterAuth(){
+  try{
+    if(window.firebase&&!fbDb){
+      fbDb=firebase.firestore();
+    }
+  }catch(e){console.warn('Firestore init failed',e);}
 }
 
 var myTgId=null;
@@ -706,8 +712,8 @@ function firebaseAuth(callback){
         var data=JSON.parse(xhr.responseText);
         if(data.token){
           firebase.auth().signInWithCustomToken(data.token)
-            .then(function(){console.log('Firebase Auth: signed in as',firebase.auth().currentUser.uid);callback();})
-            .catch(function(err){console.warn('Auth signIn error:',err);callback();});
+            .then(function(){console.log('Firebase Auth: signed in as',firebase.auth().currentUser.uid);initFirestoreAfterAuth();callback();})
+            .catch(function(err){console.warn('Auth signIn error:',err);initFirestoreAfterAuth();callback();});
         }else{callback();}
       }catch(e){console.warn('Auth parse error:',e);callback();}
     }else{console.warn('Auth server error:',xhr.status);callback();}
@@ -761,13 +767,13 @@ function submitRegistration(){
   if(!name){showToast('Введи имя');return;}
   trackEvent('registration',{name:name});
   if(!fbDb){
-    if(window.firebase)initFirebase(); // на случай если firebase подгрузился, а initFirebase ещё не отработал
+    if(window.firebase)initFirestoreAfterAuth(); // на случай если firebase подгрузился, а initFirebase ещё не отработал
     if(!fbDb){
       showToast('Нет связи с сервером, пробую снова...');
       var attempts=0;
       var retryTimer=setInterval(function(){
         attempts++;
-        if(!fbDb&&window.firebase)initFirebase();
+        if(!fbDb&&window.firebase)initFirestoreAfterAuth();
         if(fbDb){
           clearInterval(retryTimer);
           submitRegistration();
